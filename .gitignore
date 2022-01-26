@@ -1,0 +1,14 @@
+.env
+
+# Hardhat files
+hardhat/.env
+hardhat/node_modules
+hardhat/coverage
+hardhat/coverage.json
+hardhat/typechain
+hardhat/cache
+hardhat/artifacts
+
+# Frontend files
+frontend/.env
+frontend/node_modules
