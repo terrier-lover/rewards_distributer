@@ -1,5 +1,3 @@
-import * as dotenv from "dotenv";
-
 import { HardhatUserConfig, task } from "hardhat/config";
 import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-waffle";
@@ -8,8 +6,7 @@ import "@openzeppelin/hardhat-upgrades";
 import "@typechain/hardhat";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
-
-dotenv.config();
+import { ENV } from './settings';
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -21,9 +18,6 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
   }
 });
 
-// You need to export an object to set up your config
-// Go to https://hardhat.org/config/ to learn more
-
 function notEmpty<TValue>(value: TValue | null | undefined): value is TValue {
   return value !== null && value !== undefined;
 }
@@ -32,18 +26,29 @@ const config: HardhatUserConfig = {
   solidity: "0.8.4",
   networks: {
     rinkeby: {
-      url: process.env.RINKEBY_URL || "",
+      url: ENV.RINKEBY_URL || "",
       accounts:
         [
-          process.env.RINKEBY_PRIVATE_KEY_OWNER == null 
-            ? null: process.env.RINKEBY_PRIVATE_KEY_OWNER,
-          process.env.RINKEBY_PRIVATE_KEY_OTHER1 == null 
-            ? null: process.env.RINKEBY_PRIVATE_KEY_OTHER1,
+          ENV.RINKEBY_PRIVATE_KEY_OWNER == null 
+            ? null: ENV.RINKEBY_PRIVATE_KEY_OWNER,
+            ENV.RINKEBY_PRIVATE_KEY_OTHER1 == null 
+            ? null: ENV.RINKEBY_PRIVATE_KEY_OTHER1,
         ].filter(notEmpty),
+    },
+    localhost: {
+      url: "http://127.0.0.1:8545",
+      chainId: 31337,
+      // accounts:
+      //   [
+      //     ENV.RINKEBY_PRIVATE_KEY_OWNER == null 
+      //       ? null: ENV.RINKEBY_PRIVATE_KEY_OWNER,
+      //       ENV.RINKEBY_PRIVATE_KEY_OTHER1 == null 
+      //       ? null: ENV.RINKEBY_PRIVATE_KEY_OTHER1,
+      //   ].filter(notEmpty),
     },
   },
   gasReporter: {
-    enabled: process.env.REPORT_GAS !== undefined,
+    enabled: ENV.REPORT_GAS !== undefined,
     currency: "USD",
   },
 };

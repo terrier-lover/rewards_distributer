@@ -11,20 +11,53 @@ import type { BigNumber as BigNumberType } from "ethers";
 import type { MerkleTree as MerkleTreeType } from 'merkletreejs';
 import type { RecipientInfoType } from './merkleTreeUtils';
 
-import { ethers, upgrades } from 'hardhat';
+import { ethers, upgrades, network } from 'hardhat';
 import {
     ERC20__factory as ERC20Factory,
     UpgradeableMerkleDistributer__factory as DistributerFactory,
     TestUpgradeableMerkleDistributerV2__factory as TestUpgradeableMerkleDistributerV2Factory,
     SimpleToken__factory as SimpleTokenFactory,
 } from '../typechain';
-import * as dotenv from "dotenv";
 import { createMerkleTree } from "./merkleTreeUtils";
+import { ENV, ENV_DISTRIBUTER_CONTRACT_ADDRESS, ENV_ERC20_CONTRACT_ADDRESS } from './../settings';
+import { readFile, writeFile } from 'fs';
+import { parse, stringify } from 'envfile';
+import { promisify } from "util";
 
-dotenv.config();
+async function setEnv(
+    keyValueMap: {[key: string]: string},
+    path: string,
+) {
+    const envRawData = await promisify(readFile)(path, {encoding: 'utf-8'});
+    const envData = parse(envRawData);
+    Object.keys(keyValueMap).forEach(key => {
+        envData[key] = keyValueMap[key];
+    });
 
-const ERC20_CONTRACT_ADDRESS = process.env.ERC20_CONTRACT_ADDRESS;
-const DISTRIBUTER_CONTRACT_ADDRESS = process.env.DISTRIBUTER_CONTRACT_ADDRESS;
+    await promisify(writeFile)(path, stringify(envData));
+}
+
+async function setAddressAndAmountMappingJson(
+    addressAmountMap: {[key: string]: number},
+    path: string,
+) {
+    const json = JSON.stringify(addressAmountMap);
+    await promisify(writeFile)(path, json);
+}
+
+function getContractAddress() {
+    const ERC20_CONTRACT_ADDRESS 
+        = ENV[`${network.name.toUpperCase()}_${ENV_ERC20_CONTRACT_ADDRESS}`]!;
+    const DISTRIBUTER_CONTRACT_ADDRESS
+        = ENV[`${network.name.toUpperCase()}_${ENV_DISTRIBUTER_CONTRACT_ADDRESS}`]!;
+
+    return { ERC20_CONTRACT_ADDRESS, DISTRIBUTER_CONTRACT_ADDRESS };
+}
+
+const {
+    ERC20_CONTRACT_ADDRESS, 
+    DISTRIBUTER_CONTRACT_ADDRESS,
+} = getContractAddress();
 
 // Mint to holder contract
 async function transferERC20(
@@ -180,6 +213,8 @@ async function getRelevantContracts() {
 export {
     ERC20_CONTRACT_ADDRESS,
     DISTRIBUTER_CONTRACT_ADDRESS,
+    setEnv,
+    setAddressAndAmountMappingJson,
     upgradeToDistributerV2,
     formatERC20Amount,
     getERC20AmountWithDecimals,

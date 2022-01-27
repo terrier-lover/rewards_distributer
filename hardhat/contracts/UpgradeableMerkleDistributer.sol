@@ -24,7 +24,7 @@ contract UpgradeableMerkleDistributer is
     uint256 public currentVersion; // default value is 0
     mapping(uint256 => Detail) public versionToDetailMap;
 
-    event Claim(address indexed recipient, uint256 currentAmount);
+    event Claim(address indexed recipient, uint256 claimedAmount);
 
     modifier onlyAdminOrModeratorRoles() {
         require(

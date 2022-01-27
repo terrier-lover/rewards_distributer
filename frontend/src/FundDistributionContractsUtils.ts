@@ -1,44 +1,69 @@
 import type { JsonRpcSigner } from '@ethersproject/providers'
 import type {
     ERC20 as ERC20Type,
-    Distribute as DistributeType,
-    Holder as HolderType,
+    UpgradeableMerkleDistributer as DistributerType,
 } from "./typechain";
 import type { BigNumber as BigNumberType } from "ethers";
+import { createMerkleTree, getClaimArguments, RecipientInfoType } from './MerkleTreeUtils';
 
 import * as ethers from "ethers";
 import {
-    Distribute__factory as DistributeFactory,
-    Holder__factory as HolderFactory,
+    UpgradeableMerkleDistributer__factory as DistributerFactory,
     ERC20__factory as ERC20Factory,
 } from './typechain';
-import {
-    ERC20_TOKEN_CONTRACT_ADDRESS,
-    DISTRIBUTE_TOKEN_CONTRACT_ADDRESS,
-    HOLDER_TOKEN_CONTRACT_ADDRESS
-} from './DefaultSettings';
+import addressAndAmountMapJson from './addressAndAmountMap.json';
+import { getContractAddress } from './DefaultSettings';
 
 const MUTATION_KEY_DISTRIBUTE_FLOW = 'mutationDistributeFlow';
 const QUERY_KEY_ERC20_DECIMALS = 'queryERC20Decimals';
 const QUERY_KEY_ERC20_SIMBOL = 'queryERC20Simbol';
-const QUERY_KEY_DISTRIBUTE_RECIPIENT_AMOUNT = 'queryDistributeRecipientAmount';
+const QUERY_KEY_DISTRIBUTE_IS_RECIPIENT_CLAIMABLE = 'queryDistributeIsRecipientClaimable';
 
-function getContracts(signer: JsonRpcSigner): {
+const ADDRESS_AND_AMOUNT_MAP = addressAndAmountMapJson as { [address: string]: number };
+
+function getRewardAmountByAddress(address: string) {
+    const rewardAmount: number | null = ADDRESS_AND_AMOUNT_MAP[address];
+    return rewardAmount ?? 0;
+}
+
+function getMerkleTree(tokenDecimals: number) {
+    const recipientsInfo: RecipientInfoType[] =
+        Object.keys(ADDRESS_AND_AMOUNT_MAP).map(address => {
+            const rewardAmountWithoutDecimals = ADDRESS_AND_AMOUNT_MAP[address];
+            return { address, rewardAmountWithoutDecimals }
+        });
+
+    return createMerkleTree({ recipientsInfo, tokenDecimals });
+}
+
+function getClaimArgumentsForAddress(address: string, tokenDecimals: number) {
+    const rewardAmountWithoutDecimals = getRewardAmountByAddress(address);
+    const merkleTree = getMerkleTree(tokenDecimals);
+    return getClaimArguments({
+        merkleTree,
+        recipientInfo: { address, rewardAmountWithoutDecimals },
+        tokenDecimals
+    });
+}
+
+function getContracts(
+    signer: JsonRpcSigner,
+    currentChainId: number,
+): {
     erc20: ERC20Type,
-    distribute: DistributeType,
-    holder: HolderType,
+    distribute: DistributerType,
 } {
-    const erc20 = (
-        new ERC20Factory(signer)
-    ).attach(ERC20_TOKEN_CONTRACT_ADDRESS);
-    const distribute = (
-        new DistributeFactory(signer)
-    ).attach(DISTRIBUTE_TOKEN_CONTRACT_ADDRESS);
-    const holder = (
-        new HolderFactory(signer)
-    ).attach(HOLDER_TOKEN_CONTRACT_ADDRESS);
+    const {
+        ERC20_CONTRACT_ADDRESS,
+        DISTRIBUTER_CONTRACT_ADDRESS,
+    } = getContractAddress(currentChainId);
 
-    return { erc20, distribute, holder };
+    const erc20 = (new ERC20Factory(signer)).attach(ERC20_CONTRACT_ADDRESS);
+    const distribute = (new DistributerFactory(signer)).attach(
+        DISTRIBUTER_CONTRACT_ADDRESS
+    );
+
+    return { erc20, distribute };
 }
 
 function convertToNumberFromBigNumber(
@@ -47,14 +72,18 @@ function convertToNumberFromBigNumber(
 ) {
     return parseFloat(
         ethers.utils.formatUnits(availableRewards, tokenDecimals)
-    );    
+    );
 }
 
-export { 
+export {
+    ADDRESS_AND_AMOUNT_MAP,
     MUTATION_KEY_DISTRIBUTE_FLOW,
     QUERY_KEY_ERC20_DECIMALS,
     QUERY_KEY_ERC20_SIMBOL,
-    QUERY_KEY_DISTRIBUTE_RECIPIENT_AMOUNT,
+    QUERY_KEY_DISTRIBUTE_IS_RECIPIENT_CLAIMABLE,
     convertToNumberFromBigNumber,
     getContracts,
- };
+    getRewardAmountByAddress,
+    getMerkleTree,
+    getClaimArgumentsForAddress,
+};

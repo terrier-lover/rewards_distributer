@@ -13,9 +13,29 @@ import * as Contracts from ".";
 declare module "hardhat/types/runtime" {
   interface HardhatEthersHelpers extends HardhatEthersHelpersBase {
     getContractFactory(
-      name: "Ownable",
+      name: "AccessControlEnumerableUpgradeable",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.Ownable__factory>;
+    ): Promise<Contracts.AccessControlEnumerableUpgradeable__factory>;
+    getContractFactory(
+      name: "AccessControlUpgradeable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.AccessControlUpgradeable__factory>;
+    getContractFactory(
+      name: "IAccessControlEnumerableUpgradeable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IAccessControlEnumerableUpgradeable__factory>;
+    getContractFactory(
+      name: "IAccessControlUpgradeable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IAccessControlUpgradeable__factory>;
+    getContractFactory(
+      name: "ERC165Upgradeable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ERC165Upgradeable__factory>;
+    getContractFactory(
+      name: "IERC165Upgradeable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IERC165Upgradeable__factory>;
     getContractFactory(
       name: "ERC20",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -29,23 +49,48 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC20__factory>;
     getContractFactory(
-      name: "Distribute",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.Distribute__factory>;
-    getContractFactory(
-      name: "Holder",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.Holder__factory>;
-    getContractFactory(
       name: "SimpleToken",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.SimpleToken__factory>;
+    getContractFactory(
+      name: "TestUpgradeableMerkleDistributerV2",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.TestUpgradeableMerkleDistributerV2__factory>;
+    getContractFactory(
+      name: "UpgradeableMerkleDistributer",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.UpgradeableMerkleDistributer__factory>;
 
     getContractAt(
-      name: "Ownable",
+      name: "AccessControlEnumerableUpgradeable",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.Ownable>;
+    ): Promise<Contracts.AccessControlEnumerableUpgradeable>;
+    getContractAt(
+      name: "AccessControlUpgradeable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.AccessControlUpgradeable>;
+    getContractAt(
+      name: "IAccessControlEnumerableUpgradeable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IAccessControlEnumerableUpgradeable>;
+    getContractAt(
+      name: "IAccessControlUpgradeable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IAccessControlUpgradeable>;
+    getContractAt(
+      name: "ERC165Upgradeable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ERC165Upgradeable>;
+    getContractAt(
+      name: "IERC165Upgradeable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IERC165Upgradeable>;
     getContractAt(
       name: "ERC20",
       address: string,
@@ -62,20 +107,20 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IERC20>;
     getContractAt(
-      name: "Distribute",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.Distribute>;
-    getContractAt(
-      name: "Holder",
-      address: string,
-      signer?: ethers.Signer
-    ): Promise<Contracts.Holder>;
-    getContractAt(
       name: "SimpleToken",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.SimpleToken>;
+    getContractAt(
+      name: "TestUpgradeableMerkleDistributerV2",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.TestUpgradeableMerkleDistributerV2>;
+    getContractAt(
+      name: "UpgradeableMerkleDistributer",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.UpgradeableMerkleDistributer>;
 
     // default types
     getContractFactory(

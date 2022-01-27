@@ -14,7 +14,6 @@ function FundDistributionCardLoading() {
                 />
             }
             rewardAmountTextNode={<Skeleton height={'90px'} width={'100px'} />}
-            footerTextNode={<Skeleton height={'24px'} width={'195px'} />}
             listDescriptionsNode={CARD_LISTS}
             buttonNode={
                 <Skeleton mt={10} height={'40px'} width={'100%'} borderRadius={'16px'} 

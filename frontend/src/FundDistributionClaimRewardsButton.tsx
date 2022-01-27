@@ -4,28 +4,39 @@ import type { BigNumber as BigNumberType } from "ethers";
 import { Button, useToast } from '@chakra-ui/react';
 import {
     MUTATION_KEY_DISTRIBUTE_FLOW,
-    QUERY_KEY_DISTRIBUTE_RECIPIENT_AMOUNT,
+    QUERY_KEY_DISTRIBUTE_IS_RECIPIENT_CLAIMABLE,
     getContracts,
 } from './FundDistributionContractsUtils';
 import { useMutation, useQueryClient } from 'react-query';
 import { useEffect, useState } from 'react';
+import { useFundDistributionContext } from './FundDistributionContextProvider';
 
-function FundDistributionClaimRewardsButton(
-    { signer, rewardAmount }: { signer: JsonRpcSigner, rewardAmount: number }
-) {
-    const { holder, distribute } = getContracts(signer);
+function FundDistributionClaimRewardsButton({
+    signer,
+}: {
+    signer: JsonRpcSigner,
+}) {
+    const {
+        currentAddress,
+        currentChainId,
+        rewardAmountWithoutDecimals,
+        rewardAmountWithDecimals,
+        rewardHexProof,
+        isRecipientClaimable,
+    } = useFundDistributionContext();
+
+    const { distribute } = getContracts(signer, currentChainId);
     const queryClient = useQueryClient();
 
     useEffect(() => {
-        const eventKey = 'LogDistribute';
+        const eventKey = 'Claim';
         const listener = (
-            _from: string,
             _recipient: string,
-            currentRecipientAmount: BigNumberType
+            _claimedtAmount: BigNumberType
         ) => {
             queryClient.setQueryData(
-                QUERY_KEY_DISTRIBUTE_RECIPIENT_AMOUNT,
-                currentRecipientAmount,
+                QUERY_KEY_DISTRIBUTE_IS_RECIPIENT_CLAIMABLE,
+                false,
             );
         };
         distribute.on(eventKey, listener);
@@ -42,7 +53,11 @@ function FundDistributionClaimRewardsButton(
         isLoading: isMutationLoading,
         mutate,
     } = useMutation(
-        () => holder.distributeFlow(),
+        () => distribute.claim(
+            currentAddress,
+            rewardAmountWithDecimals,
+            rewardHexProof
+        ),
         {
             mutationKey: MUTATION_KEY_DISTRIBUTE_FLOW,
             onSuccess: (tx) => {
@@ -82,7 +97,9 @@ function FundDistributionClaimRewardsButton(
     );
 
     const isLoading = isMutationLoading || isTransactionWaiting;
-    const isDisabled = isLoading || rewardAmount <= 0;
+    const isDisabled = isLoading 
+        || rewardAmountWithoutDecimals <= 0 
+        || !isRecipientClaimable;
 
     return (
         <Button
@@ -92,12 +109,8 @@ function FundDistributionClaimRewardsButton(
             color={'white'}
             rounded={'xl'}
             boxShadow={'0 5px 20px 0px rgb(72 187 120 / 43%)'}
-            _hover={{
-                bg: 'green.500',
-            }}
-            _focus={{
-                bg: 'green.500',
-            }}
+            _hover={{ bg: 'green.500' }}
+            _focus={{ bg: 'green.500' }}
             onClick={() => mutate()}
             disabled={isDisabled}
             isLoading={isLoading}

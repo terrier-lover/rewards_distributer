@@ -30,7 +30,8 @@ function ErrorFallback(
                 resetErrorBoundary();
             }
         });
-    }, [error, toast]);
+    }, [error, toast, resetErrorBoundary]);
+
     // Intentionally return nothing
     return (<></>)
 }

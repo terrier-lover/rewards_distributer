@@ -1,27 +1,35 @@
 import { useWeb3 } from "@3rdweb/hooks";
+import CommonAlert from "./CommonAlert";
 
 import FundDistributionCardContractsContainer from "./FundDistributionCardContractsContainer";
 import FundDistributionCardLoading from "./FundDistributionCardLoading";
 
 function FundDistributionCardWeb3Container() {
-    const { 
-        address: currentAddress, 
-        provider, 
-        chainId: currentChainId 
+    const {
+        address: currentAddress,
+        provider,
+        chainId: currentChainId,
+        error,
     } = useWeb3();
-
     const signer = provider?.getSigner();
 
-    if (currentAddress == null || provider == null || signer == null) {
+    if (error != null) {
+        return (
+            <CommonAlert title="Error" description={error.message} />
+        );
+    }
+
+    if (currentAddress == null || provider == null || signer == null || currentChainId == null) {
         return <FundDistributionCardLoading />;
     }
 
     return (
         <FundDistributionCardContractsContainer
+            currentChainId={currentChainId}
             currentAddress={currentAddress}
             signer={signer}
             // To force re-render, set key with current ChainId 
-            key={`card-contracts-container-${currentChainId ?? 0}`}
+            key={`card-contracts-container-${currentChainId}`}
         />
     );
 }

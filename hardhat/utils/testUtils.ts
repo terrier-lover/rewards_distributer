@@ -7,7 +7,6 @@ import type {
     SignerWithAddress as SignerWithAddressType
 } from "@nomiclabs/hardhat-ethers/signers";
 import type { MerkleTree as MerkleTreeType } from 'merkletreejs';
-import type { BigNumber as BigNumberType } from "ethers";
 
 import {
     getERC20AmountWithDecimals,
@@ -20,6 +19,16 @@ import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 import { createMerkleTree, getClaimArguments, RecipientInfoType } from "./merkleTreeUtils";
+
+type TestScenariosType = {
+    shouldFirstClaimRevert: boolean,
+    shouldSecondClaimRevert: boolean,
+    isFirstGetClaimable: boolean,
+    isSecondGetClaimable: boolean,
+};
+type TestRecipientInfoType = RecipientInfoType & {
+    connectAs: SignerWithAddressType,
+};
 
 async function testMintSimpleToken(
     options: {
@@ -148,16 +157,10 @@ async function testDistributerV2NewLogic(options: {
     expect(actualTestValue).to.be.equals(BigNumber.from(expectedTestValue));
 }
 
-type TestScenariosType = {
-    shouldFirstClaimRevert: boolean,
-    shouldSecondClaimRevert: boolean,
-    isFirstGetClaimable: boolean,
-    isSecondGetClaimable: boolean,
-};
 async function testMainFlow(options: {
     distributerAmountWithoutDecimals: number,
-    recipientsInfo: RecipientInfoType[],
-    pastRecipientsInfo?: RecipientInfoType[],
+    recipientsInfo: TestRecipientInfoType[],
+    pastRecipientsInfo?: TestRecipientInfoType[],
     blocklistedOperations?: {
         transferERC20ToDistributerContract?: boolean,
     },
@@ -232,7 +235,7 @@ async function testMainFlow(options: {
     });
     const firstClaims = recipientsInfo.map(async (recipientInfo, index) => {
         return await testRecipientClaimFlow({
-            connectAs: recipientInfo?.connectAs!,
+            connectAs: recipientInfo.connectAs,
             recipientInfo,
             recipientExpectedReward: testScenarios[index].shouldFirstClaimRevert
                 ? undefined : recipientsExpectedRewards[index],
@@ -281,7 +284,7 @@ async function testCurrentVersion(options: {
 async function testIsClaimable(options: {
     erc20: ERC20Type,
     merkleTree: MerkleTreeType,
-    recipientsInfo: RecipientInfoType[],
+    recipientsInfo: TestRecipientInfoType[],
     distributer: DistributerType,
     scenariosIsClaimable: boolean[],
 }) {

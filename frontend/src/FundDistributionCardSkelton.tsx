@@ -9,13 +9,11 @@ import {
 function FundDistributionCardSkelton({
     headlinePillNode,
     rewardAmountTextNode,
-    footerTextNode,
     listDescriptionsNode,
     buttonNode,
 }: {
     headlinePillNode: React.ReactNode,
     rewardAmountTextNode: React.ReactNode,
-    footerTextNode: React.ReactNode,
     listDescriptionsNode?: React.ReactNode[] | null,
     buttonNode: React.ReactNode,
 }) {
@@ -36,7 +34,6 @@ function FundDistributionCardSkelton({
                     <Stack direction={'row'} textAlign={'center'} align={'center'}>
                         {rewardAmountTextNode}
                     </Stack>
-                    {footerTextNode}
                 </Stack>
             </Stack>
             <Box bg={useColorModeValue('gray.50', 'gray.900')} px={6} py={10}>

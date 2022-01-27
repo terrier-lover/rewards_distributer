@@ -1,76 +1,114 @@
 import type { JsonRpcSigner } from '@ethersproject/providers'
 
-import * as ethers from "ethers";
-import { CARD_LISTS, DEFAULT_RETRY } from './DefaultSettings';
+import type { BigNumber as BigNumberType } from "ethers";
+
+import { DEFAULT_RETRY } from './DefaultSettings';
 import FundDistributionClaimRewardsButton from "./FundDistributionClaimRewardsButton";
 import FundDistributionCard from "./FundDistributionCard";
-import { useQueries } from "react-query";
+import { useQueries, useQuery } from "react-query";
 import {
-    QUERY_KEY_ERC20_DECIMALS,
     QUERY_KEY_ERC20_SIMBOL,
-    QUERY_KEY_DISTRIBUTE_RECIPIENT_AMOUNT,
+    QUERY_KEY_ERC20_DECIMALS,
+    QUERY_KEY_DISTRIBUTE_IS_RECIPIENT_CLAIMABLE,
     getContracts,
+    getRewardAmountByAddress,
+    getClaimArgumentsForAddress,
 } from './FundDistributionContractsUtils';
 import CommonErrorBoundary from './CommonErrorBoundary';
-import { Spinner } from '@chakra-ui/react'
 import CommonAlert from './CommonAlert';
 import FundDistributionCardLoading from './FundDistributionCardLoading';
+import { FundDistributionContextProvider } from './FundDistributionContextProvider';
 
 function FundDistributionCardContractsContainer({
     currentAddress,
+    currentChainId,
     signer
 }: {
     currentAddress: string,
+    currentChainId: number,
     signer: JsonRpcSigner,
 }) {
-    const { erc20, distribute } = getContracts(signer);
+    const { erc20, distribute } = getContracts(signer, currentChainId);
 
-    const erc20Decimals = erc20.decimals();
-    const erc20Simbol = erc20.symbol();
-    const recipientAmount = distribute.getRecipientAmount(currentAddress);
-    const results =
+    const getERC20Decimals = erc20.decimals();
+    const getERC20Simbol = erc20.symbol();
+    const rewardAmountWithoutDecimals
+        = getRewardAmountByAddress(currentAddress) ?? 0;
+
+    const firstResults =
         useQueries([
             {
-                queryKey: QUERY_KEY_ERC20_DECIMALS,
-                queryFn: () => erc20Decimals,
-                retry: DEFAULT_RETRY,
-            },
-            {
                 queryKey: QUERY_KEY_ERC20_SIMBOL,
-                queryFn: () => erc20Simbol,
+                queryFn: () => getERC20Simbol,
                 retry: DEFAULT_RETRY,
             },
             {
-                queryKey: QUERY_KEY_DISTRIBUTE_RECIPIENT_AMOUNT,
-                queryFn: () => recipientAmount,
+                queryKey: QUERY_KEY_ERC20_DECIMALS,
+                queryFn: () => getERC20Decimals,
                 retry: DEFAULT_RETRY,
             },
         ]);
 
-    const isLoading = results.some(result => result.isLoading);
-    const isError = results.some(result => result.isError);
-    const isSuccess = results.every(result => result.isSuccess);
+    const isFirstLoading = firstResults.some(result => result.isLoading);
+    const isFirstError = firstResults.some(result => result.isError);
+    const isFirstSuccess = firstResults.every(result => result.isSuccess);
+    const tokenSimbol = firstResults[0].data ?? null;
+    const tokenDecimals = firstResults[1].data ?? null;
 
-    if (isLoading) {
+    let claimArguments = tokenDecimals == null ? null
+        : getClaimArgumentsForAddress(currentAddress, tokenDecimals);
+
+    const getIsClaimableCallback = (
+        address: string | null,
+        amountWithDecimals: BigNumberType | null,
+        hexProof: string[] | null
+    ) => {
+        if (address == null || amountWithDecimals == null || hexProof == null) {
+            const fakeReturn: [boolean, string] = [
+                false,
+                "Not enough data to query isClaim status"
+            ];
+            // Hack: This is a fake return to make typescript happy
+            return new Promise<[boolean, string]>(
+                (resolve) => resolve(fakeReturn)
+            );
+        }
+        return distribute.getIsClaimableOnCurrentVersion(
+            address,
+            amountWithDecimals,
+            hexProof,
+        );
+    };
+    const getIsClaimable = getIsClaimableCallback(
+        currentAddress,
+        claimArguments?.amount ?? null,
+        claimArguments?.hexProof ?? null,
+    );
+    const {
+        isSuccess: isSecondSuccess,
+        isError: isSecondError,
+        isLoading: isSecondLoading,
+        data: isClaimableInfo,
+    } = useQuery(
+        QUERY_KEY_DISTRIBUTE_IS_RECIPIENT_CLAIMABLE,
+        () => getIsClaimable,
+        {
+            enabled: claimArguments != null,
+        }
+    )
+
+    if (isFirstLoading || isSecondLoading) {
         return <FundDistributionCardLoading />;
     }
 
-    if (isError || !isSuccess) {
-        return (
-            <CommonAlert
-                title="Error"
-                description="Something went wrong. Please visit this page again."
-            />
-        );
-    }
-
-    const tokenDecimals = results[0].data ?? null;
-    const tokenSimbol = results[1].data ?? null;
-    const availableRewards = results[2].data ?? ethers.BigNumber.from(0);
-
     if (
-        tokenDecimals == null 
+        isFirstError
+        || !isFirstSuccess
+        || isSecondError
+        || !isSecondSuccess
         || tokenSimbol == null
+        || tokenDecimals == null
+        || claimArguments == null
     ) {
         return (
             <CommonAlert
@@ -80,26 +118,33 @@ function FundDistributionCardContractsContainer({
         );
     }
 
-    const rewardAmount = parseFloat(
-        ethers.utils.formatUnits(availableRewards, tokenDecimals)
+    const isRecipientClaimable = isClaimableInfo == null ? false : isClaimableInfo[0];
+
+    const buttonNode = (
+        <CommonErrorBoundary>
+            <FundDistributionClaimRewardsButton signer={signer} />
+        </CommonErrorBoundary>
     );
 
     return (
         <CommonErrorBoundary>
-            <FundDistributionCard
-                rewardAmount={rewardAmount}
-                tokenSimbol={tokenSimbol}
-                startDateString="May 4, 2012"
-                endDateString="May 3, 2013"
-                buttonNode={
-                    <CommonErrorBoundary>
-                        <FundDistributionClaimRewardsButton
-                            signer={signer}
-                            rewardAmount={rewardAmount}
-                        />
-                    </CommonErrorBoundary>
+            <FundDistributionContextProvider
+                contextData={
+                    {
+                        rewardAmountWithoutDecimals
+                            : isRecipientClaimable ? rewardAmountWithoutDecimals : 0,
+                        rewardAmountWithDecimals: claimArguments.amount,
+                        rewardHexProof: claimArguments.hexProof,
+                        tokenDecimals,
+                        tokenSimbol,
+                        currentAddress,
+                        currentChainId,
+                        isRecipientClaimable,
+                    }
                 }
-            />
+            >
+                <FundDistributionCard buttonNode={buttonNode} />
+            </FundDistributionContextProvider>
         </CommonErrorBoundary>
     );
 }

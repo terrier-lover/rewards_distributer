@@ -5,20 +5,14 @@ import {
 } from '@chakra-ui/react';
 import FundDistributionCardSkelton from './FundDistributionCardSkelton';
 import { CARD_LISTS } from './DefaultSettings';
+import { useFundDistributionContext } from './FundDistributionContextProvider';
 
-function FundDistributionCard({
-    rewardAmount,
-    tokenSimbol,
-    startDateString,
-    endDateString,
-    buttonNode,
-}: {
-    rewardAmount: number,
-    tokenSimbol: string,
-    startDateString: string,
-    endDateString: string,
-    buttonNode: React.ReactNode,
-}) {
+function FundDistributionCard({buttonNode,}: {buttonNode: React.ReactNode,}) {
+    const {
+        rewardAmountWithoutDecimals, 
+        tokenSimbol,
+    } = useFundDistributionContext();
+
     return (
         <FundDistributionCardSkelton
             headlinePillNode={
@@ -36,15 +30,10 @@ function FundDistributionCard({
             rewardAmountTextNode={
                 <>
                     <Text fontSize={'6xl'} fontWeight={800}>
-                        {rewardAmount}
+                        {rewardAmountWithoutDecimals}
                     </Text>
                     <Text fontSize={'3xl'} paddingTop={'16px'}>{tokenSimbol}</Text>
                 </>
-            }
-            footerTextNode={
-                <Text color={'gray.500'}>
-                    {startDateString} ~ {endDateString}
-                </Text>
             }
             listDescriptionsNode={CARD_LISTS}
             buttonNode={buttonNode}
