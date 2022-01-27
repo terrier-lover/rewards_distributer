@@ -31,20 +31,22 @@ See [this demo page](https://github.com/terrier-lover/rewards_distributer/blob/m
 - git clone https://github.com/terrier-lover/rewards_distributer.git
 
 ## Hardhat
-- cd hardhat 
-- npm install
+- $ cd hardhat 
+- $ npm install
+- Prepare .env using .env.example
 
 If you want to use localnet, do followings:
-- npx hardhat node
-- npx hardhat run scripts/deploy.ts --network localhost
-- npx hardhat run scripts/helper/runSendETHToContract.ts --network localhost * # Change hardcoded variable of address in runSendETHToContract.ts *
+- $ npx hardhat node
+- $ npx hardhat run scripts/deploy.ts --network localhost
+- $ npx hardhat run scripts/helper/runSendETHToContract.ts --network localhost * # Change hardcoded variable of address in runSendETHToContract.ts *
 
 Whenever hardhat compiles and produces new typechains (this is exported under ./hardhat/typechain), copy typechains in hardhat/typechain/ to /frontend/src/typechain/ so that frontend code can use latest definitions. In addition, change the front-end codebase accordingly.
 
 ## Frontend
-- cd frontend
-- npm install
-- npm start
+- $ cd frontend
+- $ npm install
+- Prepare .env using .env.example
+- $ npm start
 
 # How to test
 - cd hardhat
