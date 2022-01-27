@@ -53,8 +53,15 @@ Whenever hardhat compiles and produces new typechains (this is exported under ./
 # Future work
 - Bug fixes
   - Feel free to create issues [here](https://github.com/terrier-lover/rewards_distributer/issues)
+- Add more test cases
 - Feature updates
-  
+  - Support Versioning Distributer functionalities mentioned above
+  - Potentially others
+- Misc
+  - Change icon
+  - Have better way to manage env files
+  - Clean up codebase in frontend and hardhat directory
+ 
 ## References
 - [Uniswap Merkle Distributer implementation](https://github.com/Uniswap/merkle-distributor)
 - [Open Zeppelin - Merkle Tree impelemntation of NFT airdrop](https://blog.openzeppelin.com/workshop-recap-building-an-nft-merkle-drop/ )
