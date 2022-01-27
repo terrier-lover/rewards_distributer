@@ -1,5 +1,5 @@
 # Demo
-Here are demos of this software.
+Here are demos of this software. These behaviors are confirmed in rinkeby and localhost network.
 
 ## Video
 https://watch.screencastify.com/v/HsjBfZd0Wd23rkZOLkXd
