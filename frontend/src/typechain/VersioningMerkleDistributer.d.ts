@@ -19,8 +19,7 @@ import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 import type { TypedEventFilter, TypedEvent, TypedListener } from "./common";
 
-interface TestUpgradeableMerkleDistributerV2Interface
-  extends ethers.utils.Interface {
+interface VersioningMerkleDistributerInterface extends ethers.utils.Interface {
   functions: {
     "DEFAULT_ADMIN_ROLE()": FunctionFragment;
     "MODERATOR_ROLE()": FunctionFragment;
@@ -31,17 +30,14 @@ interface TestUpgradeableMerkleDistributerV2Interface
     "getRoleAdmin(bytes32)": FunctionFragment;
     "getRoleMember(bytes32,uint256)": FunctionFragment;
     "getRoleMemberCount(bytes32)": FunctionFragment;
-    "getTestValue()": FunctionFragment;
     "grantRole(bytes32,address)": FunctionFragment;
     "hasRole(bytes32,address)": FunctionFragment;
-    "initialize(address,bytes32)": FunctionFragment;
+    "initialize()": FunctionFragment;
     "renounceRole(bytes32,address)": FunctionFragment;
     "revokeRole(bytes32,address)": FunctionFragment;
     "setCurrentVersion(uint256)": FunctionFragment;
     "setMerkleRoot(bytes32)": FunctionFragment;
-    "setTestValue(uint256)": FunctionFragment;
     "supportsInterface(bytes4)": FunctionFragment;
-    "testValue()": FunctionFragment;
     "versionToDetailMap(uint256)": FunctionFragment;
   };
 
@@ -82,10 +78,6 @@ interface TestUpgradeableMerkleDistributerV2Interface
     values: [BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "getTestValue",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
     functionFragment: "grantRole",
     values: [BytesLike, string]
   ): string;
@@ -95,7 +87,7 @@ interface TestUpgradeableMerkleDistributerV2Interface
   ): string;
   encodeFunctionData(
     functionFragment: "initialize",
-    values: [string, BytesLike]
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "renounceRole",
@@ -114,14 +106,9 @@ interface TestUpgradeableMerkleDistributerV2Interface
     values: [BytesLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "setTestValue",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
     functionFragment: "supportsInterface",
     values: [BytesLike]
   ): string;
-  encodeFunctionData(functionFragment: "testValue", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "versionToDetailMap",
     values: [BigNumberish]
@@ -160,10 +147,6 @@ interface TestUpgradeableMerkleDistributerV2Interface
     functionFragment: "getRoleMemberCount",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "getTestValue",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "grantRole", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "hasRole", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
@@ -181,14 +164,9 @@ interface TestUpgradeableMerkleDistributerV2Interface
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setTestValue",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "supportsInterface",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "testValue", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "versionToDetailMap",
     data: BytesLike
@@ -208,7 +186,7 @@ interface TestUpgradeableMerkleDistributerV2Interface
 }
 
 export type ClaimEvent = TypedEvent<
-  [string, BigNumber] & { recipient: string; claimedAmount: BigNumber }
+  [string, BigNumber] & { recipient: string; currentAmount: BigNumber }
 >;
 
 export type RoleAdminChangedEvent = TypedEvent<
@@ -227,7 +205,7 @@ export type RoleRevokedEvent = TypedEvent<
   [string, string, string] & { role: string; account: string; sender: string }
 >;
 
-export class TestUpgradeableMerkleDistributerV2 extends BaseContract {
+export class VersioningMerkleDistributer extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
@@ -268,7 +246,7 @@ export class TestUpgradeableMerkleDistributerV2 extends BaseContract {
     toBlock?: string | number | undefined
   ): Promise<Array<TypedEvent<EventArgsArray & EventArgsObject>>>;
 
-  interface: TestUpgradeableMerkleDistributerV2Interface;
+  interface: VersioningMerkleDistributerInterface;
 
   functions: {
     DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<[string]>;
@@ -312,8 +290,6 @@ export class TestUpgradeableMerkleDistributerV2 extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
-    getTestValue(overrides?: CallOverrides): Promise<[BigNumber]>;
-
     grantRole(
       role: BytesLike,
       account: string,
@@ -326,7 +302,11 @@ export class TestUpgradeableMerkleDistributerV2 extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
-    initialize(
+    "initialize()"(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    "initialize(address,bytes32)"(
       initialToken: string,
       initialMerkleRoot: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -354,17 +334,10 @@ export class TestUpgradeableMerkleDistributerV2 extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    setTestValue(
-      newTestValue: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
     supportsInterface(
       interfaceId: BytesLike,
       overrides?: CallOverrides
     ): Promise<[boolean]>;
-
-    testValue(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     versionToDetailMap(
       arg0: BigNumberish,
@@ -413,8 +386,6 @@ export class TestUpgradeableMerkleDistributerV2 extends BaseContract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
-  getTestValue(overrides?: CallOverrides): Promise<BigNumber>;
-
   grantRole(
     role: BytesLike,
     account: string,
@@ -427,7 +398,11 @@ export class TestUpgradeableMerkleDistributerV2 extends BaseContract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
-  initialize(
+  "initialize()"(
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  "initialize(address,bytes32)"(
     initialToken: string,
     initialMerkleRoot: BytesLike,
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -455,17 +430,10 @@ export class TestUpgradeableMerkleDistributerV2 extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  setTestValue(
-    newTestValue: BigNumberish,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
   supportsInterface(
     interfaceId: BytesLike,
     overrides?: CallOverrides
   ): Promise<boolean>;
-
-  testValue(overrides?: CallOverrides): Promise<BigNumber>;
 
   versionToDetailMap(
     arg0: BigNumberish,
@@ -514,8 +482,6 @@ export class TestUpgradeableMerkleDistributerV2 extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    getTestValue(overrides?: CallOverrides): Promise<BigNumber>;
-
     grantRole(
       role: BytesLike,
       account: string,
@@ -528,7 +494,9 @@ export class TestUpgradeableMerkleDistributerV2 extends BaseContract {
       overrides?: CallOverrides
     ): Promise<boolean>;
 
-    initialize(
+    "initialize()"(overrides?: CallOverrides): Promise<void>;
+
+    "initialize(address,bytes32)"(
       initialToken: string,
       initialMerkleRoot: BytesLike,
       overrides?: CallOverrides
@@ -556,17 +524,10 @@ export class TestUpgradeableMerkleDistributerV2 extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    setTestValue(
-      newTestValue: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     supportsInterface(
       interfaceId: BytesLike,
       overrides?: CallOverrides
     ): Promise<boolean>;
-
-    testValue(overrides?: CallOverrides): Promise<BigNumber>;
 
     versionToDetailMap(
       arg0: BigNumberish,
@@ -577,18 +538,18 @@ export class TestUpgradeableMerkleDistributerV2 extends BaseContract {
   filters: {
     "Claim(address,uint256)"(
       recipient?: string | null,
-      claimedAmount?: null
+      currentAmount?: null
     ): TypedEventFilter<
       [string, BigNumber],
-      { recipient: string; claimedAmount: BigNumber }
+      { recipient: string; currentAmount: BigNumber }
     >;
 
     Claim(
       recipient?: string | null,
-      claimedAmount?: null
+      currentAmount?: null
     ): TypedEventFilter<
       [string, BigNumber],
-      { recipient: string; claimedAmount: BigNumber }
+      { recipient: string; currentAmount: BigNumber }
     >;
 
     "RoleAdminChanged(bytes32,bytes32,bytes32)"(
@@ -691,8 +652,6 @@ export class TestUpgradeableMerkleDistributerV2 extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    getTestValue(overrides?: CallOverrides): Promise<BigNumber>;
-
     grantRole(
       role: BytesLike,
       account: string,
@@ -705,7 +664,11 @@ export class TestUpgradeableMerkleDistributerV2 extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    initialize(
+    "initialize()"(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    "initialize(address,bytes32)"(
       initialToken: string,
       initialMerkleRoot: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -733,17 +696,10 @@ export class TestUpgradeableMerkleDistributerV2 extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    setTestValue(
-      newTestValue: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
     supportsInterface(
       interfaceId: BytesLike,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
-
-    testValue(overrides?: CallOverrides): Promise<BigNumber>;
 
     versionToDetailMap(
       arg0: BigNumberish,
@@ -798,8 +754,6 @@ export class TestUpgradeableMerkleDistributerV2 extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    getTestValue(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     grantRole(
       role: BytesLike,
       account: string,
@@ -812,7 +766,11 @@ export class TestUpgradeableMerkleDistributerV2 extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    initialize(
+    "initialize()"(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    "initialize(address,bytes32)"(
       initialToken: string,
       initialMerkleRoot: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -840,17 +798,10 @@ export class TestUpgradeableMerkleDistributerV2 extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    setTestValue(
-      newTestValue: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
     supportsInterface(
       interfaceId: BytesLike,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
-
-    testValue(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     versionToDetailMap(
       arg0: BigNumberish,

@@ -49,17 +49,25 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC20__factory>;
     getContractFactory(
+      name: "AbstractMerkleDistributer",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.AbstractMerkleDistributer__factory>;
+    getContractFactory(
+      name: "SimpleMerkleDistributer",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SimpleMerkleDistributer__factory>;
+    getContractFactory(
       name: "SimpleToken",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.SimpleToken__factory>;
     getContractFactory(
-      name: "TestUpgradeableMerkleDistributerV2",
+      name: "TestSimpleMerkleDistributerV2",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.TestUpgradeableMerkleDistributerV2__factory>;
+    ): Promise<Contracts.TestSimpleMerkleDistributerV2__factory>;
     getContractFactory(
-      name: "UpgradeableMerkleDistributer",
+      name: "VersioningMerkleDistributer",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.UpgradeableMerkleDistributer__factory>;
+    ): Promise<Contracts.VersioningMerkleDistributer__factory>;
 
     getContractAt(
       name: "AccessControlEnumerableUpgradeable",
@@ -107,20 +115,30 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IERC20>;
     getContractAt(
+      name: "AbstractMerkleDistributer",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.AbstractMerkleDistributer>;
+    getContractAt(
+      name: "SimpleMerkleDistributer",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.SimpleMerkleDistributer>;
+    getContractAt(
       name: "SimpleToken",
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.SimpleToken>;
     getContractAt(
-      name: "TestUpgradeableMerkleDistributerV2",
+      name: "TestSimpleMerkleDistributerV2",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.TestUpgradeableMerkleDistributerV2>;
+    ): Promise<Contracts.TestSimpleMerkleDistributerV2>;
     getContractAt(
-      name: "UpgradeableMerkleDistributer",
+      name: "VersioningMerkleDistributer",
       address: string,
       signer?: ethers.Signer
-    ): Promise<Contracts.UpgradeableMerkleDistributer>;
+    ): Promise<Contracts.VersioningMerkleDistributer>;
 
     // default types
     getContractFactory(

@@ -39,10 +39,14 @@ async function main() {
     const recipientsInfo = [{
         address: CUSTOM_RECIPIENT1 ?? recipient.address,
         rewardAmountWithoutDecimals: RECIPIENT1_AMOUNT_WITHOUT_DECIMALS,
-    }, {
-        address: CUSTOM_RECIPIENT2 ?? recipient.address,
-        rewardAmountWithoutDecimals: RECIPIENT2_AMOUNT_WITHOUT_DECIMALS,
     }];
+    if (CUSTOM_RECIPIENT2 != null) {
+        recipientsInfo.push({
+            address: CUSTOM_RECIPIENT2,
+            rewardAmountWithoutDecimals: RECIPIENT2_AMOUNT_WITHOUT_DECIMALS,
+        });
+    }
+
     const { distributer, erc20, merkleTree } =
         await initialDeployAndCreateMerkleTree({ owner, recipientsInfo });
 
@@ -79,11 +83,7 @@ async function main() {
         });        
         const [isClaimable, _] = await distributer.connect(
             recipientInfo.address,
-        ).getIsClaimableOnCurrentVersion(
-            address,
-            amount,
-            hexProof,
-        );
+        ).getIsClaimable(address, amount, hexProof);
         console.log(`Can recipient${index} claim reward? ${isClaimable ? "Yes" : "No"}`);
 
         if (SHOULD_RECIPIENT_CLAIM_REWARD) {

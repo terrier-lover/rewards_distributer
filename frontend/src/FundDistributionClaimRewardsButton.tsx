@@ -8,7 +8,7 @@ import {
     getContracts,
 } from './FundDistributionContractsUtils';
 import { useMutation, useQueryClient } from 'react-query';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useFundDistributionContext } from './FundDistributionContextProvider';
 
 function FundDistributionClaimRewardsButton({
@@ -23,6 +23,7 @@ function FundDistributionClaimRewardsButton({
         rewardAmountWithDecimals,
         rewardHexProof,
         isRecipientClaimable,
+        setIsRecipientClaimable,
     } = useFundDistributionContext();
 
     const { distribute } = getContracts(signer, currentChainId);
@@ -56,7 +57,7 @@ function FundDistributionClaimRewardsButton({
         () => distribute.claim(
             currentAddress,
             rewardAmountWithDecimals,
-            rewardHexProof
+            rewardHexProof,
         ),
         {
             mutationKey: MUTATION_KEY_DISTRIBUTE_FLOW,
@@ -64,6 +65,7 @@ function FundDistributionClaimRewardsButton({
                 setIsTransactionWaiting(true);
                 Promise.resolve(tx.wait())
                     .then(_tx => {
+                        setIsRecipientClaimable(false);
                         toast({
                             title: 'Claimed reward!',
                             description: "Your reward was claimed.",
@@ -93,8 +95,10 @@ function FundDistributionClaimRewardsButton({
                     isClosable: true,
                 });
             },
+            retry: 0,
         },
     );
+    const onClick = useCallback(() => mutate(), [mutate]);
 
     const isLoading = isMutationLoading || isTransactionWaiting;
     const isDisabled = isLoading 
@@ -111,7 +115,7 @@ function FundDistributionClaimRewardsButton({
             boxShadow={'0 5px 20px 0px rgb(72 187 120 / 43%)'}
             _hover={{ bg: 'green.500' }}
             _focus={{ bg: 'green.500' }}
-            onClick={() => mutate()}
+            onClick={onClick}
             disabled={isDisabled}
             isLoading={isLoading}
             loadingText={

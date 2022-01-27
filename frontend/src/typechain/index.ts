@@ -10,9 +10,11 @@ export type { IERC165Upgradeable } from "./IERC165Upgradeable";
 export type { ERC20 } from "./ERC20";
 export type { IERC20Metadata } from "./IERC20Metadata";
 export type { IERC20 } from "./IERC20";
+export type { AbstractMerkleDistributer } from "./AbstractMerkleDistributer";
+export type { SimpleMerkleDistributer } from "./SimpleMerkleDistributer";
 export type { SimpleToken } from "./SimpleToken";
-export type { TestUpgradeableMerkleDistributerV2 } from "./TestUpgradeableMerkleDistributerV2";
-export type { UpgradeableMerkleDistributer } from "./UpgradeableMerkleDistributer";
+export type { TestSimpleMerkleDistributerV2 } from "./TestSimpleMerkleDistributerV2";
+export type { VersioningMerkleDistributer } from "./VersioningMerkleDistributer";
 
 export { AccessControlEnumerableUpgradeable__factory } from "./factories/AccessControlEnumerableUpgradeable__factory";
 export { AccessControlUpgradeable__factory } from "./factories/AccessControlUpgradeable__factory";
@@ -23,6 +25,8 @@ export { IERC165Upgradeable__factory } from "./factories/IERC165Upgradeable__fac
 export { ERC20__factory } from "./factories/ERC20__factory";
 export { IERC20Metadata__factory } from "./factories/IERC20Metadata__factory";
 export { IERC20__factory } from "./factories/IERC20__factory";
+export { AbstractMerkleDistributer__factory } from "./factories/AbstractMerkleDistributer__factory";
+export { SimpleMerkleDistributer__factory } from "./factories/SimpleMerkleDistributer__factory";
 export { SimpleToken__factory } from "./factories/SimpleToken__factory";
-export { TestUpgradeableMerkleDistributerV2__factory } from "./factories/TestUpgradeableMerkleDistributerV2__factory";
-export { UpgradeableMerkleDistributer__factory } from "./factories/UpgradeableMerkleDistributer__factory";
+export { TestSimpleMerkleDistributerV2__factory } from "./factories/TestSimpleMerkleDistributerV2__factory";
+export { VersioningMerkleDistributer__factory } from "./factories/VersioningMerkleDistributer__factory";

@@ -1,6 +1,6 @@
 import type {
-    UpgradeableMerkleDistributer as DistributerType,
-    TestUpgradeableMerkleDistributerV2 as TestDistributerV2Type,
+    SimpleMerkleDistributer as DistributerType,
+    TestSimpleMerkleDistributerV2 as TestDistributerV2Type,
     ERC20 as ERC20Type,
 } from "../typechain";
 import type {
@@ -272,15 +272,6 @@ async function testMainFlow(options: {
     return { distributer, merkleTree, erc20 };
 }
 
-async function testCurrentVersion(options: {
-    distributer: DistributerType,
-    expectedCurrentVersion: number,
-}) {
-    const { distributer, expectedCurrentVersion } = options;
-    const actualCurrentVersion = await distributer.currentVersion();
-    expect(actualCurrentVersion).to.equals(expectedCurrentVersion);
-}
-
 async function testIsClaimable(options: {
     erc20: ERC20Type,
     merkleTree: MerkleTreeType,
@@ -305,7 +296,7 @@ async function testIsClaimable(options: {
             tokenDecimals
         });
         const [actualIsClaimable, _] = 
-            await distributer.connect(recipientInfo.connectAs).getIsClaimableOnCurrentVersion(
+            await distributer.connect(recipientInfo.connectAs).getIsClaimable(
                 address,
                 amount,
                 hexProof,
@@ -316,7 +307,6 @@ async function testIsClaimable(options: {
 }
 
 export {
-    testCurrentVersion,
     testMainFlow,
     testInitialDeployAndCreateMerkleTree,
     testMintSimpleToken,

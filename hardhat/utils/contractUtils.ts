@@ -1,6 +1,6 @@
 import type {
-    UpgradeableMerkleDistributer as DistributerType,
-    TestUpgradeableMerkleDistributerV2 as TestDistributerV2Type,
+    SimpleMerkleDistributer as DistributerType,
+    TestSimpleMerkleDistributerV2 as TestDistributerV2Type,
     ERC20 as ERC20Type,
     SimpleToken as SimpleTokenType,
 } from "../typechain";
@@ -14,8 +14,8 @@ import type { RecipientInfoType } from './merkleTreeUtils';
 import { ethers, upgrades, network } from 'hardhat';
 import {
     ERC20__factory as ERC20Factory,
-    UpgradeableMerkleDistributer__factory as DistributerFactory,
-    TestUpgradeableMerkleDistributerV2__factory as TestUpgradeableMerkleDistributerV2Factory,
+    SimpleMerkleDistributer__factory as DistributerFactory,
+    TestSimpleMerkleDistributerV2__factory as TestUpgradeableMerkleDistributerV2Factory,
     SimpleToken__factory as SimpleTokenFactory,
 } from '../typechain';
 import { createMerkleTree } from "./merkleTreeUtils";
@@ -166,7 +166,7 @@ async function initialDeployAndCreateMerkleTree(options: {
         await upgrades.deployProxy(
             Distributer,
             [targetERC20.address, merkleTree.getHexRoot()],
-            { initializer: 'initialize' }
+            { initializer: 'initialize(address,bytes32)' }
         )
     ) as DistributerType;
 

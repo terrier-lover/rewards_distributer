@@ -1,14 +1,17 @@
+import type {
+  SimpleMerkleDistributer as DistributerType,
+} from "../typechain";
+
 import { ethers } from "hardhat";
 import { upgradeToDistributerV2 } from "../utils/contractUtils";
 import {
   testInitialDeployAndCreateMerkleTree,
   testMainFlow,
   testDistributerV2NewLogic,
-  testCurrentVersion,
   testIsClaimable
 } from "../utils/testUtils";
 
-describe("Fund withdrawal", () => {
+describe("Distribution test using SimpleMerkleDistributer contract", () => {
   const distributerAmountWithoutDecimals = 10000;
   const recipientRewardAmount = 100;
 
@@ -102,8 +105,9 @@ describe("Fund withdrawal", () => {
           testScenario: {
             shouldFirstClaimRevert: true,
             shouldSecondClaimRevert: true,
-            isFirstGetClaimable: false,
-            isSecondGetClaimable: false,
+            // When contract does not enough funds, return true for isClaimable status.
+            isFirstGetClaimable: true,
+            isSecondGetClaimable: true,
           },
         }
       ];
@@ -189,7 +193,7 @@ describe("Fund withdrawal", () => {
       // Start reward distribution and claiming for first merkle tree
 
       // All scenarios below: users claim their reward. Should suceed.
-      const firstMerkleTreeRecipientsInfoAndTestScenarios = [
+      const firstTestScenarios = [
         {
           recipientInfo: {
             address: recipient1EligibleForFirstReward.address,
@@ -217,23 +221,26 @@ describe("Fund withdrawal", () => {
       ];
       const { distributer, erc20 } = await testMainFlow({
         distributerAmountWithoutDecimals,
-        recipientsInfo: firstMerkleTreeRecipientsInfoAndTestScenarios.map(
-          el => el.recipientInfo
-        ),
-        testScenarios: firstMerkleTreeRecipientsInfoAndTestScenarios.map(
-          el => el.testScenario
-        ),
+        recipientsInfo: firstTestScenarios.map(el => el.recipientInfo),
+        testScenarios: firstTestScenarios.map(el => el.testScenario),
       });
 
-      // All scenarios below: users claim their reward. Should suceed.
-      const secondMerkleTreeRecipientsInfoAndTestScenarios = [
+      // All scenarios below: If user claimed the rewards already, they cannot
+      // claim the rewards again. Other than this case, test should succeed.
+      const secondTestScenarios = [
         {
           recipientInfo: {
             address: recipient3EligibleForFirstAndSecondReward.address,
             rewardAmountWithoutDecimals: recipientRewardAmount + 500,
             connectAs: recipient3EligibleForFirstAndSecondReward,
           },
-          testScenario: commonSuccessTestScenario,
+          // This recipient already claiemd their rewards, so claiming again fails.
+          testScenario: {
+            shouldFirstClaimRevert: true,
+            shouldSecondClaimRevert: true,
+            isFirstGetClaimable: false,
+            isSecondGetClaimable: false,
+          },
         },
         {
           recipientInfo: {
@@ -255,15 +262,38 @@ describe("Fund withdrawal", () => {
 
       await testMainFlow({
         distributerAmountWithoutDecimals,
-        recipientsInfo: secondMerkleTreeRecipientsInfoAndTestScenarios.map(
-          el => el.recipientInfo,
-        ),
-        testScenarios: secondMerkleTreeRecipientsInfoAndTestScenarios.map(
-          el => el.testScenario,
-        ),
-        pastRecipientsInfo: firstMerkleTreeRecipientsInfoAndTestScenarios.map(
-          el => el.recipientInfo,
-        ),
+        recipientsInfo: secondTestScenarios.map(el => el.recipientInfo),
+        testScenarios: secondTestScenarios.map(el => el.testScenario),
+        pastRecipientsInfo: firstTestScenarios.map(el => el.recipientInfo),
+        // When setting existing contracts, it will use these contracts.
+        existingContracts: { distributer, erc20 },
+      });
+
+      // Test changing hasClaimed value for certain user. 
+      // Set false at hasClaimed for a user who already claimed the rewards.
+      const setHasClaimed = await distributer.setHasClaimedPerRecipient(
+        recipient3EligibleForFirstAndSecondReward.address,
+        false, // newHasClaimed
+      );
+      await setHasClaimed.wait();
+
+      const thirdTestScenarios = [
+        {
+          recipientInfo: {
+            address: recipient3EligibleForFirstAndSecondReward.address,
+            rewardAmountWithoutDecimals: recipientRewardAmount + 500,
+            connectAs: recipient3EligibleForFirstAndSecondReward,
+          },
+          // This use should be able to claim rewards.
+          testScenario: commonSuccessTestScenario,
+        },
+      ];
+      await testMainFlow({
+        distributerAmountWithoutDecimals,
+        recipientsInfo: thirdTestScenarios.map(el => el.recipientInfo),
+        testScenarios: thirdTestScenarios.map(el => el.testScenario),
+        pastRecipientsInfo: firstTestScenarios.map(el => el.recipientInfo),
+        // When setting existing contracts, it will use these contracts.
         existingContracts: { distributer, erc20 },
       });
     }
@@ -326,10 +356,6 @@ describe("Fund withdrawal", () => {
         recipientsInfo: recipientsInfoAndTestScenarios.map(el => el.recipientInfo),
         scenariosIsClaimable: recipientsInfoAndTestScenarios.map(_ => true),
       });
-      await testCurrentVersion({
-        expectedCurrentVersion: 1,
-        distributer,
-      });
 
       // Upgrade Distributer contract
       const testDistributerV2 = await upgradeToDistributerV2({
@@ -338,12 +364,11 @@ describe("Fund withdrawal", () => {
       });
       await testDistributerV2NewLogic({ testDistributerV2 });
 
-      // Version should not change
-      await testCurrentVersion({ expectedCurrentVersion: 1, distributer });
+      // No one claims the reward, so use is able to claim their rewards here.
       await testIsClaimable({
         erc20,
         merkleTree,
-        distributer: testDistributerV2,
+        distributer: testDistributerV2 as DistributerType,
         recipientsInfo: recipientsInfoAndTestScenarios.map(el => el.recipientInfo),
         scenariosIsClaimable: recipientsInfoAndTestScenarios.map(_ => true),
       });
@@ -352,7 +377,7 @@ describe("Fund withdrawal", () => {
         recipientsInfo: recipientsInfoAndTestScenarios.map(el => el.recipientInfo),
         testScenarios: recipientsInfoAndTestScenarios.map(el => el.testScenario),
         existingContracts: {
-          distributer: testDistributerV2,
+          distributer: testDistributerV2 as DistributerType,
           erc20,
           merkleTree
         },
