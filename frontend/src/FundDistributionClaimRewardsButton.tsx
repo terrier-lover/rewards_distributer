@@ -8,8 +8,9 @@ import {
     getContracts,
 } from './FundDistributionContractsUtils';
 import { useMutation, useQueryClient } from 'react-query';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useFundDistributionContext } from './FundDistributionContextProvider';
+import FundDistributionButtonCommon from './FundDistributionButtonCommon';
 
 function FundDistributionClaimRewardsButton({
     signer,
@@ -101,29 +102,18 @@ function FundDistributionClaimRewardsButton({
     const onClick = useCallback(() => mutate(), [mutate]);
 
     const isLoading = isMutationLoading || isTransactionWaiting;
-    const isDisabled = isLoading 
-        || rewardAmountWithoutDecimals <= 0 
+    const isDisabled = isLoading
+        || rewardAmountWithoutDecimals <= 0
         || !isRecipientClaimable;
 
     return (
-        <Button
-            mt={10}
-            w={'full'}
-            bg={'green.400'}
-            color={'white'}
-            rounded={'xl'}
-            boxShadow={'0 5px 20px 0px rgb(72 187 120 / 43%)'}
-            _hover={{ bg: 'green.500' }}
-            _focus={{ bg: 'green.500' }}
-            onClick={onClick}
-            disabled={isDisabled}
+        <FundDistributionButtonCommon
+            isDisabled={isDisabled}
             isLoading={isLoading}
-            loadingText={
-                isMutationLoading ? "Claiming..." : isTransactionWaiting
-                    ? "Waiting for transaction..." : undefined}
-        >
-            {isDisabled ? "Reward not available" : "Claim Reward"}
-        </Button>
+            loadingText={isMutationLoading ? "Claiming..." : isTransactionWaiting
+                ? "Waiting for transaction..." : undefined}
+            onClick={onClick}
+        />
     );
 }
 

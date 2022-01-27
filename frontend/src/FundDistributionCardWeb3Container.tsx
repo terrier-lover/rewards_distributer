@@ -2,7 +2,7 @@ import { useWeb3 } from "@3rdweb/hooks";
 import CommonAlert from "./CommonAlert";
 
 import FundDistributionCardContractsContainer from "./FundDistributionCardContractsContainer";
-import FundDistributionCardLoading from "./FundDistributionCardLoading";
+import FundDistributionCardEmpty from "./FundDistributionCardEmpty";
 
 function FundDistributionCardWeb3Container() {
     const {
@@ -20,7 +20,7 @@ function FundDistributionCardWeb3Container() {
     }
 
     if (currentAddress == null || provider == null || signer == null || currentChainId == null) {
-        return <FundDistributionCardLoading />;
+        return <FundDistributionCardEmpty />;
     }
 
     return (

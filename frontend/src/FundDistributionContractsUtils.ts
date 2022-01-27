@@ -1,14 +1,14 @@
 import type { JsonRpcSigner } from '@ethersproject/providers'
 import type {
     ERC20 as ERC20Type,
-    UpgradeableMerkleDistributer as DistributerType,
+    SimpleMerkleDistributer as DistributerType,
 } from "./typechain";
 import type { BigNumber as BigNumberType } from "ethers";
 import { createMerkleTree, getClaimArguments, RecipientInfoType } from './MerkleTreeUtils';
 
 import * as ethers from "ethers";
 import {
-    UpgradeableMerkleDistributer__factory as DistributerFactory,
+    SimpleMerkleDistributer__factory as DistributerFactory,
     ERC20__factory as ERC20Factory,
 } from './typechain';
 import addressAndAmountMapJson from './addressAndAmountMap.json';

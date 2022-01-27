@@ -2,8 +2,8 @@ import { ethers as hardhatEthers } from "hardhat";
 import { utils } from 'ethers';
 
 const AMOUNT_WITHOUT_DECIMALS = "0.1";
-// const RECIPIENT = "0xCDB80835Ed75e8ADe4B4F8ea2969cDf189a9acc8";
-const RECIPIENT = "0x3b1F26390Db8dD9166D1a03c1499d7FBB6615f1F";
+// const RECIPIENT = "0x8c5bF4D7216b1e18CC9172595FC46e831718fd76";
+const RECIPIENT = "0x08d8Aa61255d7C65e445378e4753bC90317cb8C8";
 
 async function main() {
     const [ owner ] = await hardhatEthers.getSigners();

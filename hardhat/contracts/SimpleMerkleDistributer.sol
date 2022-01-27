@@ -2,14 +2,14 @@
 pragma solidity ^0.8.0;
 
 import {SafeMathUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
-import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {MerkleProofUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/MerkleProofUpgradeable.sol";
 import {AbstractMerkleDistributer} from "./AbstractMerkleDistributer.sol";
 
 contract SimpleMerkleDistributer is AbstractMerkleDistributer {
     using SafeMathUpgradeable for uint256;
 
-    ERC20 public token;
+    IERC20 public token;
     bytes32 merkleRoot;
     mapping(address => bool) hasClaimed;
 
@@ -19,7 +19,7 @@ contract SimpleMerkleDistributer is AbstractMerkleDistributer {
     {
         AbstractMerkleDistributer.initialize();
 
-        token = ERC20(initialToken);
+        token = IERC20(initialToken);
         merkleRoot = initialMerkleRoot;
     }
 

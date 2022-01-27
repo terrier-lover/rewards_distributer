@@ -18,6 +18,7 @@ import CommonErrorBoundary from './CommonErrorBoundary';
 import CommonAlert from './CommonAlert';
 import FundDistributionCardLoading from './FundDistributionCardLoading';
 import { FundDistributionContextProvider } from './FundDistributionContextProvider';
+import FundDistributionCardEmpty from './FundDistributionCardEmpty';
 
 function FundDistributionCardContractsContainer({
     currentAddress,
@@ -48,8 +49,9 @@ function FundDistributionCardContractsContainer({
                 retry: DEFAULT_RETRY,
             },
         ]);
-
+    console.log('firstResults', firstResults);
     const isFirstLoading = firstResults.some(result => result.isLoading);
+    const isFirstStale = firstResults.some(result => result.isStale);
     const isFirstError = firstResults.some(result => result.isError);
     const isFirstSuccess = firstResults.every(result => result.isSuccess);
     const tokenSimbol = firstResults[0].data ?? null;
@@ -73,7 +75,7 @@ function FundDistributionCardContractsContainer({
                 (resolve) => resolve(fakeReturn)
             );
         }
-        return distribute.getIsClaimableOnCurrentVersion(
+        return distribute.getIsClaimable(
             address,
             amountWithDecimals,
             hexProof,
@@ -88,6 +90,7 @@ function FundDistributionCardContractsContainer({
         isSuccess: isSecondSuccess,
         isError: isSecondError,
         isLoading: isSecondLoading,
+        isStale: isSecondStale,
         data: isClaimableInfo,
     } = useQuery(
         QUERY_KEY_DISTRIBUTE_IS_RECIPIENT_CLAIMABLE,
@@ -98,6 +101,14 @@ function FundDistributionCardContractsContainer({
     )
 
     if (isFirstLoading || isSecondLoading) {
+        if (isFirstLoading && isFirstStale) {
+            return <FundDistributionCardEmpty />;
+        }
+
+        if (isSecondLoading && isSecondStale) {
+            return <FundDistributionCardEmpty />;
+        }
+        
         return <FundDistributionCardLoading />;
     }
 

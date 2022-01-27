@@ -7,7 +7,7 @@
       "hash": "0xc566ee283228744e482ab12e45ce0218965c549cf6e51ad61184e4e25067d5b7",
       "type": 2,
       "accessList": [],
-      "blockHash": "0xfa2201e32a9522518fecf8cdaf03534d24037433829f30dd0973af8560c61c77",
+      "blockHash": "0x0e4cc22fb39b3c0dd90dcdce667948f208174572c16aeb03bc8fddb0fa0611b5",
       "blockNumber": 3,
       "transactionIndex": 0,
       "confirmations": 1,
@@ -100,14 +100,14 @@
     },
     {
       "address": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
-      "txHash": "0xbcb8f008e9fffb3f2752c114ac6239410ff84d8b18b2eb9a3360964b05ae6c02",
+      "txHash": "0x0a632203f697834e01403317aebf20692320c1d0a1774e0439cce640873b5340",
       "kind": "transparent"
     }
   ],
   "impls": {
     "397d9008e1bc21f0f7be8b0503583137ac27568ae619da60b55981a5219b4531": {
       "address": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
-      "txHash": "0x3ab50e4731460cc907b81301817824f6472f592c6bf471db1fbc826c6681f3a7",
+      "txHash": "0xd75907385c3d74e8bfba3940c3a8733cc739a181ffb4c2b38f3cc086d7dc448b",
       "layout": {
         "storage": [
           {
@@ -173,7 +173,7 @@
           {
             "contract": "SimpleMerkleDistributer",
             "label": "token",
-            "type": "t_contract(ERC20)2817",
+            "type": "t_contract(IERC20)2349",
             "src": "contracts/SimpleMerkleDistributer.sol:12"
           },
           {
@@ -190,8 +190,8 @@
           }
         ],
         "types": {
-          "t_contract(ERC20)2817": {
-            "label": "contract ERC20"
+          "t_contract(IERC20)2349": {
+            "label": "contract IERC20"
           },
           "t_bytes32": {
             "label": "bytes32"
