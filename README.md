@@ -14,6 +14,16 @@ Solidity source codes use following techniques or algorithms:
   - [Access Control](https://docs.openzeppelin.com/contracts/4.x/api/access)
   - [Hardhat Upgrades API](https://docs.openzeppelin.com/upgrades-plugins/1.x/api-hardhat-upgrades)
 
+Currently provides Simple Distributer and Versioning Distributer (Versioning Distributer is not yet ready as of Jan 27, 2022).
+Functionalities of Simple Distributer are as follows:
+- Admins or moderators can specify target address who should receive tokens as rewards and their eligible amounts
+- Users can only claim their rewards once as default. Admins or moderators need to change isClaimed flag to false per user.
+- It supports upgradeablity provided by Hardhat and OpenZeppelin
+
+Versioning Distributer is designed to accomodate more compilicated cases such as following:
+- Users can receive multiple rewards at different timing. Admins or moderators do not need to reset isClaimed flag
+- Specs TBD...
+
 # How to install
 - git clone https://github.com/terrier-lover/rewards_distributer.git
 
@@ -23,7 +33,6 @@ Solidity source codes use following techniques or algorithms:
 
 If you want to use localnet, do followings:
 - npx hardhat node
-- npx hardhat compile
 - npx hardhat run scripts/deploy.ts --network localhost
 - npx hardhat run scripts/helper/runSendETHToContract.ts --network localhost * # Change hardcoded variable of address in runSendETHToContract.ts *
 
@@ -35,9 +44,17 @@ Whenever hardhat compiles and produces new typechains (this is exported under ./
 - npm start
 
 # How to test
+- cd hardhat
+- npx hardhat test
 
 # Demo
 See [this demo page](https://github.com/terrier-lover/rewards_distributer/blob/main/demo/README.md)
+
+# Future work
+- Bug fixes
+  - Feel free to create issues [here](https://github.com/terrier-lover/rewards_distributer/issues)
+- Feature updates
+  
 
 ## References
 - [Uniswap Merkle Distributer implementation](https://github.com/Uniswap/merkle-distributor)
