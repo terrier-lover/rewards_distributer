@@ -33,7 +33,7 @@ See [this demo page](https://github.com/terrier-lover/rewards_distributer/blob/m
 ## Hardhat
 - $ cd hardhat 
 - $ npm install
-- Prepare .env using .env.example
+- Prepare .env using .env.example. Do not need to put value in ..._CONTRACT_ADDRESS
 
 If you want to use localnet, do followings:
 - $ npx hardhat node
@@ -45,7 +45,7 @@ Whenever hardhat compiles and produces new typechains (this is exported under ./
 ## Frontend
 - $ cd frontend
 - $ npm install
-- Prepare .env using .env.example
+- Prepare .env using .env.example. Do not need to put value in ..._CONTRACT_ADDRESS
 - $ npm start
 
 # How to test
