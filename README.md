@@ -24,6 +24,9 @@ Versioning Distributer is designed to accomodate more compilicated cases such as
 - Users can receive multiple rewards at different timing. Admins or moderators do not need to reset isClaimed flag
 - Specs TBD...
 
+# Demo
+See [this demo page](https://github.com/terrier-lover/rewards_distributer/blob/main/demo/README.md)
+
 # How to install
 - git clone https://github.com/terrier-lover/rewards_distributer.git
 
@@ -47,15 +50,11 @@ Whenever hardhat compiles and produces new typechains (this is exported under ./
 - cd hardhat
 - npx hardhat test
 
-# Demo
-See [this demo page](https://github.com/terrier-lover/rewards_distributer/blob/main/demo/README.md)
-
 # Future work
 - Bug fixes
   - Feel free to create issues [here](https://github.com/terrier-lover/rewards_distributer/issues)
 - Feature updates
   
-
 ## References
 - [Uniswap Merkle Distributer implementation](https://github.com/Uniswap/merkle-distributor)
 - [Open Zeppelin - Merkle Tree impelemntation of NFT airdrop](https://blog.openzeppelin.com/workshop-recap-building-an-nft-merkle-drop/ )
