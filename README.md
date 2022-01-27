@@ -1,14 +1,31 @@
-# reward_distributer
+# Rewards Distributer
+This software provides a functionality to distribute tokens as rewards to target users. The distribution is based on Merkle Tree algorithm. Admins of the contract can specify any tokens to distribute to their users.
+
+Technical stacks are as follows:
+- Solidity
+- Hardhat
+- Typescript
+- React (React Query)
+
+Solidity source codes use following techniques or algorithms:
+- OpenZeppelin
+  - [Merkle Proof](https://docs.openzeppelin.com/contracts/4.x/api/utils#MerkleProof)
+  - [Reentrancy Guard](https://docs.openzeppelin.com/contracts/4.x/api/security#ReentrancyGuard)
+  - [Access Control](https://docs.openzeppelin.com/contracts/4.x/api/access)
+  - [Hardhat Upgrades API](https://docs.openzeppelin.com/upgrades-plugins/1.x/api-hardhat-upgrades)
+
+# Installation steps
+
+# Demo
+See [this link]()
 
 ## References
 - [Uniswap Merkle Distributer implementation](https://github.com/Uniswap/merkle-distributor)
 - [Open Zeppelin - Merkle Tree impelemntation of NFT airdrop](https://blog.openzeppelin.com/workshop-recap-building-an-nft-merkle-drop/ )
 - [Merkle airdrop starter](https://github.com/Anish-Agnihotri/merkle-airdrop-starter)
 
-## Open Source License
-MIT License
+## License - MIT License
 
-## Disclaimer
 Copyright 2022 TerrierLover
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
