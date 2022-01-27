@@ -54,6 +54,7 @@ Whenever hardhat compiles and produces new typechains (this is exported under ./
 - Bug fixes
   - Feel free to create issues [here](https://github.com/terrier-lover/rewards_distributer/issues)
 - Add more test cases
+- Support Matic network
 - Feature updates
   - Support Versioning Distributer functionalities mentioned above
   - Potentially others
