@@ -33,7 +33,7 @@ See [this demo page](https://github.com/terrier-lover/rewards_distributer/blob/m
 ## Hardhat
 - $ cd hardhat 
 - $ npm install
-- Prepare .env using .env.example. Do not need to put value in ..._CONTRACT_ADDRESS
+- Prepare .env using .env.example. Do not need to put value in ...\_CONTRACT_ADDRESS variable. Also do not need to put private keys for chains that you do not use. When you just need to use rinkeby, just add the private address of your wallets on RINKEBY_.... 
 
 If you want to use localnet, do followings:
 - $ npx hardhat node
@@ -45,7 +45,7 @@ Whenever hardhat compiles and produces new typechains (this is exported under ./
 ## Frontend
 - $ cd frontend
 - $ npm install
-- Prepare .env using .env.example. Do not need to put value in ..._CONTRACT_ADDRESS
+- Prepare .env using .env.example. Do not need to put value in ...\_CONTRACT_ADDRESS variable
 - $ npm start
 
 # How to test
