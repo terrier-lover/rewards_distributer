@@ -1,17 +1,18 @@
 import type { JsonRpcSigner } from '@ethersproject/providers'
 
 import type { BigNumber as BigNumberType } from "ethers";
+import type { SimpleMerkleDistributer as DistributerType } from "./typechain";
 
 import { DEFAULT_RETRY } from './DefaultSettings';
 import FundDistributionClaimRewardsButton from "./FundDistributionClaimRewardsButton";
 import FundDistributionCard from "./FundDistributionCard";
-import { useQueries, useQuery } from "react-query";
+import { useQueries } from "react-query";
 import {
     QUERY_KEY_ERC20_SIMBOL,
     QUERY_KEY_ERC20_DECIMALS,
     QUERY_KEY_DISTRIBUTE_IS_RECIPIENT_CLAIMABLE,
     getContracts,
-    getRewardAmountByAddress,
+    getTargetRecipientsInfo,
     getClaimArgumentsForAddress,
 } from './FundDistributionContractsUtils';
 import CommonErrorBoundary from './CommonErrorBoundary';
@@ -19,6 +20,7 @@ import CommonAlert from './CommonAlert';
 import FundDistributionCardLoading from './FundDistributionCardLoading';
 import { FundDistributionContextProvider } from './FundDistributionContextProvider';
 import FundDistributionCardEmpty from './FundDistributionCardEmpty';
+import { ClaimArgumentType } from './MerkleTreeUtils';
 
 function FundDistributionCardContractsContainer({
     currentAddress,
@@ -29,12 +31,10 @@ function FundDistributionCardContractsContainer({
     currentChainId: number,
     signer: JsonRpcSigner,
 }) {
-    const { erc20, distribute } = getContracts(signer, currentChainId);
+    const { distribute } = getContracts(signer, currentChainId);
 
-    const getERC20Decimals = erc20.decimals();
-    const getERC20Simbol = erc20.symbol();
-    const rewardAmountWithoutDecimals
-        = getRewardAmountByAddress(currentAddress) ?? 0;
+    const getERC20Decimals = distribute.getTokenDecimals();
+    const getERC20Simbol = distribute.getTokenSymbol();
 
     const firstResults =
         useQueries([
@@ -49,7 +49,7 @@ function FundDistributionCardContractsContainer({
                 retry: DEFAULT_RETRY,
             },
         ]);
-    console.log('firstResults', firstResults);
+
     const isFirstLoading = firstResults.some(result => result.isLoading);
     const isFirstStale = firstResults.some(result => result.isStale);
     const isFirstError = firstResults.some(result => result.isError);
@@ -57,48 +57,35 @@ function FundDistributionCardContractsContainer({
     const tokenSimbol = firstResults[0].data ?? null;
     const tokenDecimals = firstResults[1].data ?? null;
 
-    let claimArguments = tokenDecimals == null ? null
-        : getClaimArgumentsForAddress(currentAddress, tokenDecimals);
-
-    const getIsClaimableCallback = (
-        address: string | null,
-        amountWithDecimals: BigNumberType | null,
-        hexProof: string[] | null
-    ) => {
-        if (address == null || amountWithDecimals == null || hexProof == null) {
-            const fakeReturn: [boolean, string] = [
-                false,
-                "Not enough data to query isClaim status"
-            ];
-            // Hack: This is a fake return to make typescript happy
-            return new Promise<[boolean, string]>(
-                (resolve) => resolve(fakeReturn)
+    const targetRecipientsInfo = getTargetRecipientsInfo(currentAddress);
+    const claimArguments: ClaimArgumentType[] | null 
+        = tokenDecimals == null || targetRecipientsInfo == null
+            ? []
+            : targetRecipientsInfo.map(
+                info => getClaimArgumentsForAddress(info, tokenDecimals)
             );
-        }
-        return distribute.getIsClaimable(
-            address,
-            amountWithDecimals,
-            hexProof,
-        );
-    };
-    const getIsClaimable = getIsClaimableCallback(
-        currentAddress,
-        claimArguments?.amount ?? null,
-        claimArguments?.hexProof ?? null,
-    );
-    const {
-        isSuccess: isSecondSuccess,
-        isError: isSecondError,
-        isLoading: isSecondLoading,
-        isStale: isSecondStale,
-        data: isClaimableInfo,
-    } = useQuery(
-        QUERY_KEY_DISTRIBUTE_IS_RECIPIENT_CLAIMABLE,
-        () => getIsClaimable,
-        {
+
+    const secondQueries = claimArguments.map((claimArgument, index) => {
+        const getIsClaimable = getIsClaimableCallback({
+            address: currentAddress,
+            amountWithDecimals: claimArgument?.amount ?? null,
+            uniqueKey: claimArgument?.uniqueKey ?? null,
+            hexProof: claimArgument?.hexProof ?? null,
+            distribute,
+        });
+        return {
+            queryKey: `${QUERY_KEY_DISTRIBUTE_IS_RECIPIENT_CLAIMABLE}_${index}`,
+            queryFn: () => getIsClaimable,
+            retry: DEFAULT_RETRY,
             enabled: claimArguments != null,
-        }
-    )
+        };
+    });
+
+    const secondResults = useQueries(secondQueries);
+    const isSecondLoading = secondResults.some(result => result.isLoading);
+    const isSecondStale = secondResults.some(result => result.isStale);
+    const isSecondError = secondResults.some(result => result.isError);
+    const isSecondSuccess = secondResults.every(result => result.isSuccess);
 
     if (isFirstLoading || isSecondLoading) {
         if (isFirstLoading && isFirstStale) {
@@ -108,7 +95,7 @@ function FundDistributionCardContractsContainer({
         if (isSecondLoading && isSecondStale) {
             return <FundDistributionCardEmpty />;
         }
-        
+
         return <FundDistributionCardLoading />;
     }
 
@@ -129,35 +116,85 @@ function FundDistributionCardContractsContainer({
         );
     }
 
-    const isRecipientClaimable = isClaimableInfo == null ? false : isClaimableInfo[0];
+    const firstClaimableResultIndex = secondResults.findIndex(
+        result => result.data != null && result.data[0] === true
+    ) ?? null;
+    const firstClaimableResult = 
+        secondResults[firstClaimableResultIndex]?.data ?? null;
+    const isRecipientClaimable = 
+        (
+            firstClaimableResultIndex == null 
+            || firstClaimableResultIndex < 0
+            || firstClaimableResult == null
+        )
+            ? false 
+            : firstClaimableResult[0] ?? false;
 
     const buttonNode = (
         <CommonErrorBoundary>
             <FundDistributionClaimRewardsButton signer={signer} />
         </CommonErrorBoundary>
     );
+    const rewardAmountWithoutDecimals = isRecipientClaimable
+        ? (targetRecipientsInfo[firstClaimableResultIndex]
+            .rewardAmountWithoutDecimals ?? 0)
+        : 0;
 
     return (
         <CommonErrorBoundary>
             <FundDistributionContextProvider
-                contextData={
-                    {
-                        rewardAmountWithoutDecimals
-                            : isRecipientClaimable ? rewardAmountWithoutDecimals : 0,
-                        rewardAmountWithDecimals: claimArguments.amount,
-                        rewardHexProof: claimArguments.hexProof,
-                        tokenDecimals,
-                        tokenSimbol,
-                        currentAddress,
-                        currentChainId,
-                        isRecipientClaimable,
-                    }
-                }
+                contextData={{
+                    rewardAmountWithoutDecimals,
+                    rewardAmountWithDecimals: 
+                        claimArguments[firstClaimableResultIndex]?.amount,
+                    rewardHexProof: 
+                        claimArguments[firstClaimableResultIndex]?.hexProof,
+                    rewardUniqueKey:
+                        claimArguments[firstClaimableResultIndex]?.uniqueKey,
+                    tokenDecimals,
+                    tokenSimbol,
+                    currentAddress,
+                    currentChainId,
+                    isRecipientClaimable,
+                    firstClaimableResultIndex,
+                }}
             >
                 <FundDistributionCard buttonNode={buttonNode} />
             </FundDistributionContextProvider>
         </CommonErrorBoundary>
     );
 }
+
+function getIsClaimableCallback(options: {
+    address: string | null,
+    amountWithDecimals: BigNumberType | null,
+    uniqueKey: string | null,
+    hexProof: string[] | null,
+    distribute: DistributerType,
+}) {
+    const { address, amountWithDecimals, uniqueKey, hexProof, distribute } = options;
+
+    if (
+        address == null
+        || amountWithDecimals == null
+        || hexProof == null
+        || uniqueKey == null
+    ) {
+        const fakeReturn: [boolean, string] = [
+            false,
+            "Not enough data to query isClaim status"
+        ];
+        // Hack: This is a fake return to make typescript happy
+        return new Promise<[boolean, string]>(
+            (resolve) => resolve(fakeReturn)
+        );
+    }
+    return distribute.getIsClaimable(
+        address,
+        amountWithDecimals,
+        uniqueKey,
+        hexProof,
+    );
+};
 
 export default FundDistributionCardContractsContainer;

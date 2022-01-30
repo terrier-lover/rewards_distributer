@@ -35,16 +35,9 @@ const config: HardhatUserConfig = {
             ? null: ENV.RINKEBY_PRIVATE_KEY_OTHER1,
         ].filter(notEmpty),
     },
-    localhost: {
+    geth_localhost: {
       url: "http://127.0.0.1:8545",
       chainId: 31337,
-      // accounts:
-      //   [
-      //     ENV.RINKEBY_PRIVATE_KEY_OWNER == null 
-      //       ? null: ENV.RINKEBY_PRIVATE_KEY_OWNER,
-      //       ENV.RINKEBY_PRIVATE_KEY_OTHER1 == null 
-      //       ? null: ENV.RINKEBY_PRIVATE_KEY_OTHER1,
-      //   ].filter(notEmpty),
     },
   },
   gasReporter: {

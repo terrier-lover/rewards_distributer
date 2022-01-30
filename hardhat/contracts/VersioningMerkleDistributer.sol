@@ -1,21 +1,17 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {SafeMathUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {MerkleProofUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/MerkleProofUpgradeable.sol";
-import {AbstractMerkleDistributer} from "./AbstractMerkleDistributer.sol";
+import {AbstractMerkleDistributer, IERC20Metadata} from "./AbstractMerkleDistributer.sol";
 
 // WARNING: This contract is working-in-progress status. Never use this on production yet.
 contract VersioningMerkleDistributer is AbstractMerkleDistributer {
-    using SafeMathUpgradeable for uint256;
-
     struct Detail {
         mapping(address => bool) hasClaimed;
         bytes32 merkleRoot;
     }
 
-    IERC20 private token;
     uint256 public currentVersion; // default value is 0
     mapping(uint256 => Detail) public versionToDetailMap;
 
@@ -25,8 +21,8 @@ contract VersioningMerkleDistributer is AbstractMerkleDistributer {
     {
         AbstractMerkleDistributer.initialize();
 
-        token = IERC20(initialToken);
-        currentVersion = currentVersion.add(1); // Version starts from 1
+        token = IERC20Metadata(initialToken);
+        currentVersion = currentVersion + 1; // Version starts from 1
         versionToDetailMap[currentVersion].merkleRoot = initialMerkleRoot;
     }
 
@@ -34,7 +30,7 @@ contract VersioningMerkleDistributer is AbstractMerkleDistributer {
         public
         onlyAdminOrModeratorRoles
     {
-        currentVersion = currentVersion.add(1);
+        currentVersion = currentVersion + 1;
         versionToDetailMap[currentVersion].merkleRoot = newMerkleRoot;
     }
 
@@ -50,6 +46,7 @@ contract VersioningMerkleDistributer is AbstractMerkleDistributer {
     function claim(
         address recipient,
         uint256 amount,
+        string memory uniqueKey,
         bytes32[] calldata proof
     ) external override nonReentrant {
         require(msg.sender == recipient, "Cannot claim reward of others.");
@@ -58,6 +55,7 @@ contract VersioningMerkleDistributer is AbstractMerkleDistributer {
             currentVersion,
             recipient,
             amount,
+            uniqueKey,
             proof
         );
         require(isClaimable, message);
@@ -65,28 +63,30 @@ contract VersioningMerkleDistributer is AbstractMerkleDistributer {
         versionToDetailMap[currentVersion].hasClaimed[recipient] = true;
         require(token.transfer(recipient, amount), "Transfer failed");
 
-        emit Claim(recipient, amount);
+        emit Claim(recipient, amount, uniqueKey);
     }
 
     function getIsClaimableOnCurrentVersion(
         address recipient,
         uint256 amount,
+        string memory uniqueKey,
         bytes32[] calldata proof
     ) public view returns (bool, string memory) {
-        return getIsClaimable(currentVersion, recipient, amount, proof);
+        return getIsClaimable(currentVersion, recipient, amount, uniqueKey, proof);
     }
 
     function getIsClaimable(
         uint256 version,
         address recipient,
         uint256 amount,
+        string memory uniqueKey,
         bytes32[] calldata proof
     ) public view returns (bool, string memory) {
         if (versionToDetailMap[version].hasClaimed[recipient]) {
             return (false, "Recipient already claimed");
         }
 
-        bytes32 leaf = keccak256(abi.encodePacked(recipient, amount));
+        bytes32 leaf = keccak256(abi.encodePacked(recipient, amount, uniqueKey));
         bool isValidLeaf = MerkleProofUpgradeable.verify(
             proof,
             versionToDetailMap[version].merkleRoot,

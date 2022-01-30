@@ -24,18 +24,20 @@ interface TestSimpleMerkleDistributerV2Interface
   functions: {
     "DEFAULT_ADMIN_ROLE()": FunctionFragment;
     "MODERATOR_ROLE()": FunctionFragment;
-    "claim(address,uint256,bytes32[])": FunctionFragment;
-    "getIsClaimable(address,uint256,bytes32[])": FunctionFragment;
+    "claim(address,uint256,string,bytes32[])": FunctionFragment;
+    "getIsClaimable(address,uint256,string,bytes32[])": FunctionFragment;
     "getRoleAdmin(bytes32)": FunctionFragment;
     "getRoleMember(bytes32,uint256)": FunctionFragment;
     "getRoleMemberCount(bytes32)": FunctionFragment;
     "getTestValue()": FunctionFragment;
+    "getTokenDecimals()": FunctionFragment;
+    "getTokenSymbol()": FunctionFragment;
     "grantRole(bytes32,address)": FunctionFragment;
     "hasRole(bytes32,address)": FunctionFragment;
     "initialize()": FunctionFragment;
     "renounceRole(bytes32,address)": FunctionFragment;
     "revokeRole(bytes32,address)": FunctionFragment;
-    "setHasClaimedPerRecipient(address,bool)": FunctionFragment;
+    "setHasClaimedPerRecipientAndUniqueKey(address,string,bool)": FunctionFragment;
     "setMerkleRoot(bytes32)": FunctionFragment;
     "setTestValue(uint256)": FunctionFragment;
     "supportsInterface(bytes4)": FunctionFragment;
@@ -53,11 +55,11 @@ interface TestSimpleMerkleDistributerV2Interface
   ): string;
   encodeFunctionData(
     functionFragment: "claim",
-    values: [string, BigNumberish, BytesLike[]]
+    values: [string, BigNumberish, string, BytesLike[]]
   ): string;
   encodeFunctionData(
     functionFragment: "getIsClaimable",
-    values: [string, BigNumberish, BytesLike[]]
+    values: [string, BigNumberish, string, BytesLike[]]
   ): string;
   encodeFunctionData(
     functionFragment: "getRoleAdmin",
@@ -73,6 +75,14 @@ interface TestSimpleMerkleDistributerV2Interface
   ): string;
   encodeFunctionData(
     functionFragment: "getTestValue",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getTokenDecimals",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getTokenSymbol",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -96,8 +106,8 @@ interface TestSimpleMerkleDistributerV2Interface
     values: [BytesLike, string]
   ): string;
   encodeFunctionData(
-    functionFragment: "setHasClaimedPerRecipient",
-    values: [string, boolean]
+    functionFragment: "setHasClaimedPerRecipientAndUniqueKey",
+    values: [string, string, boolean]
   ): string;
   encodeFunctionData(
     functionFragment: "setMerkleRoot",
@@ -143,6 +153,14 @@ interface TestSimpleMerkleDistributerV2Interface
     functionFragment: "getTestValue",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "getTokenDecimals",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getTokenSymbol",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "grantRole", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "hasRole", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
@@ -152,7 +170,7 @@ interface TestSimpleMerkleDistributerV2Interface
   ): Result;
   decodeFunctionResult(functionFragment: "revokeRole", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "setHasClaimedPerRecipient",
+    functionFragment: "setHasClaimedPerRecipientAndUniqueKey",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -171,7 +189,7 @@ interface TestSimpleMerkleDistributerV2Interface
   decodeFunctionResult(functionFragment: "token", data: BytesLike): Result;
 
   events: {
-    "Claim(address,uint256)": EventFragment;
+    "Claim(address,uint256,string)": EventFragment;
     "RoleAdminChanged(bytes32,bytes32,bytes32)": EventFragment;
     "RoleGranted(bytes32,address,address)": EventFragment;
     "RoleRevoked(bytes32,address,address)": EventFragment;
@@ -184,7 +202,11 @@ interface TestSimpleMerkleDistributerV2Interface
 }
 
 export type ClaimEvent = TypedEvent<
-  [string, BigNumber] & { recipient: string; currentAmount: BigNumber }
+  [string, BigNumber, string] & {
+    recipient: string;
+    currentAmount: BigNumber;
+    uniqueKey: string;
+  }
 >;
 
 export type RoleAdminChangedEvent = TypedEvent<
@@ -254,6 +276,7 @@ export class TestSimpleMerkleDistributerV2 extends BaseContract {
     claim(
       recipient: string,
       amount: BigNumberish,
+      uniqueKey: string,
       proof: BytesLike[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
@@ -261,6 +284,7 @@ export class TestSimpleMerkleDistributerV2 extends BaseContract {
     getIsClaimable(
       recipient: string,
       amount: BigNumberish,
+      uniqueKey: string,
       proof: BytesLike[],
       overrides?: CallOverrides
     ): Promise<[boolean, string]>;
@@ -279,6 +303,10 @@ export class TestSimpleMerkleDistributerV2 extends BaseContract {
     ): Promise<[BigNumber]>;
 
     getTestValue(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    getTokenDecimals(overrides?: CallOverrides): Promise<[number]>;
+
+    getTokenSymbol(overrides?: CallOverrides): Promise<[string]>;
 
     grantRole(
       role: BytesLike,
@@ -314,8 +342,9 @@ export class TestSimpleMerkleDistributerV2 extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    setHasClaimedPerRecipient(
+    setHasClaimedPerRecipientAndUniqueKey(
       recipient: string,
+      uniqueKey: string,
       newHasClaimed: boolean,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
@@ -347,6 +376,7 @@ export class TestSimpleMerkleDistributerV2 extends BaseContract {
   claim(
     recipient: string,
     amount: BigNumberish,
+    uniqueKey: string,
     proof: BytesLike[],
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
@@ -354,6 +384,7 @@ export class TestSimpleMerkleDistributerV2 extends BaseContract {
   getIsClaimable(
     recipient: string,
     amount: BigNumberish,
+    uniqueKey: string,
     proof: BytesLike[],
     overrides?: CallOverrides
   ): Promise<[boolean, string]>;
@@ -372,6 +403,10 @@ export class TestSimpleMerkleDistributerV2 extends BaseContract {
   ): Promise<BigNumber>;
 
   getTestValue(overrides?: CallOverrides): Promise<BigNumber>;
+
+  getTokenDecimals(overrides?: CallOverrides): Promise<number>;
+
+  getTokenSymbol(overrides?: CallOverrides): Promise<string>;
 
   grantRole(
     role: BytesLike,
@@ -407,8 +442,9 @@ export class TestSimpleMerkleDistributerV2 extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  setHasClaimedPerRecipient(
+  setHasClaimedPerRecipientAndUniqueKey(
     recipient: string,
+    uniqueKey: string,
     newHasClaimed: boolean,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
@@ -440,6 +476,7 @@ export class TestSimpleMerkleDistributerV2 extends BaseContract {
     claim(
       recipient: string,
       amount: BigNumberish,
+      uniqueKey: string,
       proof: BytesLike[],
       overrides?: CallOverrides
     ): Promise<void>;
@@ -447,6 +484,7 @@ export class TestSimpleMerkleDistributerV2 extends BaseContract {
     getIsClaimable(
       recipient: string,
       amount: BigNumberish,
+      uniqueKey: string,
       proof: BytesLike[],
       overrides?: CallOverrides
     ): Promise<[boolean, string]>;
@@ -465,6 +503,10 @@ export class TestSimpleMerkleDistributerV2 extends BaseContract {
     ): Promise<BigNumber>;
 
     getTestValue(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getTokenDecimals(overrides?: CallOverrides): Promise<number>;
+
+    getTokenSymbol(overrides?: CallOverrides): Promise<string>;
 
     grantRole(
       role: BytesLike,
@@ -498,8 +540,9 @@ export class TestSimpleMerkleDistributerV2 extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    setHasClaimedPerRecipient(
+    setHasClaimedPerRecipientAndUniqueKey(
       recipient: string,
+      uniqueKey: string,
       newHasClaimed: boolean,
       overrides?: CallOverrides
     ): Promise<void>;
@@ -525,20 +568,22 @@ export class TestSimpleMerkleDistributerV2 extends BaseContract {
   };
 
   filters: {
-    "Claim(address,uint256)"(
+    "Claim(address,uint256,string)"(
       recipient?: string | null,
-      currentAmount?: null
+      currentAmount?: null,
+      uniqueKey?: null
     ): TypedEventFilter<
-      [string, BigNumber],
-      { recipient: string; currentAmount: BigNumber }
+      [string, BigNumber, string],
+      { recipient: string; currentAmount: BigNumber; uniqueKey: string }
     >;
 
     Claim(
       recipient?: string | null,
-      currentAmount?: null
+      currentAmount?: null,
+      uniqueKey?: null
     ): TypedEventFilter<
-      [string, BigNumber],
-      { recipient: string; currentAmount: BigNumber }
+      [string, BigNumber, string],
+      { recipient: string; currentAmount: BigNumber; uniqueKey: string }
     >;
 
     "RoleAdminChanged(bytes32,bytes32,bytes32)"(
@@ -604,6 +649,7 @@ export class TestSimpleMerkleDistributerV2 extends BaseContract {
     claim(
       recipient: string,
       amount: BigNumberish,
+      uniqueKey: string,
       proof: BytesLike[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
@@ -611,6 +657,7 @@ export class TestSimpleMerkleDistributerV2 extends BaseContract {
     getIsClaimable(
       recipient: string,
       amount: BigNumberish,
+      uniqueKey: string,
       proof: BytesLike[],
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -632,6 +679,10 @@ export class TestSimpleMerkleDistributerV2 extends BaseContract {
     ): Promise<BigNumber>;
 
     getTestValue(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getTokenDecimals(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getTokenSymbol(overrides?: CallOverrides): Promise<BigNumber>;
 
     grantRole(
       role: BytesLike,
@@ -667,8 +718,9 @@ export class TestSimpleMerkleDistributerV2 extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    setHasClaimedPerRecipient(
+    setHasClaimedPerRecipientAndUniqueKey(
       recipient: string,
+      uniqueKey: string,
       newHasClaimed: boolean,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
@@ -703,6 +755,7 @@ export class TestSimpleMerkleDistributerV2 extends BaseContract {
     claim(
       recipient: string,
       amount: BigNumberish,
+      uniqueKey: string,
       proof: BytesLike[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
@@ -710,6 +763,7 @@ export class TestSimpleMerkleDistributerV2 extends BaseContract {
     getIsClaimable(
       recipient: string,
       amount: BigNumberish,
+      uniqueKey: string,
       proof: BytesLike[],
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
@@ -731,6 +785,10 @@ export class TestSimpleMerkleDistributerV2 extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     getTestValue(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    getTokenDecimals(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    getTokenSymbol(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     grantRole(
       role: BytesLike,
@@ -766,8 +824,9 @@ export class TestSimpleMerkleDistributerV2 extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    setHasClaimedPerRecipient(
+    setHasClaimedPerRecipientAndUniqueKey(
       recipient: string,
+      uniqueKey: string,
       newHasClaimed: boolean,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;

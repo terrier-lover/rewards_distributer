@@ -1,17 +1,12 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {SafeMathUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {MerkleProofUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/MerkleProofUpgradeable.sol";
-import {AbstractMerkleDistributer} from "./AbstractMerkleDistributer.sol";
+import {AbstractMerkleDistributer, IERC20Metadata} from "./AbstractMerkleDistributer.sol";
 
 contract SimpleMerkleDistributer is AbstractMerkleDistributer {
-    using SafeMathUpgradeable for uint256;
-
-    IERC20 public token;
     bytes32 merkleRoot;
-    mapping(address => bool) hasClaimed;
+    mapping(address => mapping(string => bool)) hasClaimed;
 
     function initialize(address initialToken, bytes32 initialMerkleRoot)
         public
@@ -19,7 +14,7 @@ contract SimpleMerkleDistributer is AbstractMerkleDistributer {
     {
         AbstractMerkleDistributer.initialize();
 
-        token = IERC20(initialToken);
+        token = IERC20Metadata(initialToken);
         merkleRoot = initialMerkleRoot;
     }
 
@@ -30,16 +25,21 @@ contract SimpleMerkleDistributer is AbstractMerkleDistributer {
         merkleRoot = newMerkleRoot;
     }
 
-    function setHasClaimedPerRecipient(address recipient, bool newHasClaimed)
+    function setHasClaimedPerRecipientAndUniqueKey(
+        address recipient, 
+        string memory uniqueKey,
+        bool newHasClaimed
+    )
         public
         onlyAdminOrModeratorRoles
     {
-        hasClaimed[recipient] = newHasClaimed;
+        hasClaimed[recipient][uniqueKey] = newHasClaimed;
     }
 
     function claim(
         address recipient,
         uint256 amount,
+        string memory uniqueKey,
         bytes32[] calldata proof
     ) external override nonReentrant {
         require(msg.sender == recipient, "Cannot claim reward of others.");
@@ -47,26 +47,28 @@ contract SimpleMerkleDistributer is AbstractMerkleDistributer {
         (bool isClaimable, string memory message) = getIsClaimable(
             recipient,
             amount,
+            uniqueKey,
             proof
         );
         require(isClaimable, message);
 
-        hasClaimed[recipient] = true;
+        hasClaimed[recipient][uniqueKey] = true;
         require(token.transfer(recipient, amount), "Transfer failed");
 
-        emit Claim(recipient, amount);
+        emit Claim(recipient, amount, uniqueKey);
     }
 
     function getIsClaimable(
         address recipient,
         uint256 amount,
+        string memory uniqueKey,
         bytes32[] calldata proof
     ) public view returns (bool, string memory) {
-        if (hasClaimed[recipient]) {
+        if (hasClaimed[recipient][uniqueKey]) {
             return (false, "Recipient already claimed");
         }
 
-        bytes32 leaf = keccak256(abi.encodePacked(recipient, amount));
+        bytes32 leaf = keccak256(abi.encodePacked(recipient, amount, uniqueKey));
         bool isValidLeaf = MerkleProofUpgradeable.verify(
             proof,
             merkleRoot,

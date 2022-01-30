@@ -18,7 +18,11 @@ import {
 import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
-import { createMerkleTree, getClaimArguments, RecipientInfoType } from "./merkleTreeUtils";
+import { 
+    createMerkleTree, 
+    getClaimArguments, 
+    RecipientInfoType 
+} from "../commonVariablesAndFunctionsAdapter";
 
 type TestScenariosType = {
     shouldFirstClaimRevert: boolean,
@@ -71,7 +75,7 @@ async function testRecipientClaimFlow(
     } = options;
 
     const tokenDecimals = await erc20.decimals();
-    const { address, amount, hexProof } = getClaimArguments({
+    const { address, amount, uniqueKey, hexProof } = getClaimArguments({
         merkleTree,
         recipientInfo,
         tokenDecimals
@@ -79,13 +83,13 @@ async function testRecipientClaimFlow(
     if (options.shouldBeReverted) {
         // Check error happens and tx is reverted
         await expect(
-            distributer.connect(connectAs).claim(address, amount, hexProof)
+            distributer.connect(connectAs).claim(address, amount, uniqueKey, hexProof)
         ).to.be.reverted;
     } else {
         // Confirm that claim operation as a recipient is as expected
         await expect(
-            distributer.connect(connectAs).claim(address, amount, hexProof)
-        ).to.emit(distributer, 'Claim').withArgs(connectAs.address, amount);
+            distributer.connect(connectAs).claim(address, amount, uniqueKey, hexProof)
+        ).to.emit(distributer, 'Claim').withArgs(connectAs.address, amount, uniqueKey);
 
         // Confirm that recipient balance increases
         const recipientBalanceWithDecimals =
@@ -290,7 +294,7 @@ async function testIsClaimable(options: {
     const tokenDecimals = await erc20.decimals();
 
     const isClaimable = recipientsInfo.map(async (recipientInfo, index) => {
-        const { address, amount, hexProof } = getClaimArguments({
+        const { address, amount, uniqueKey, hexProof } = getClaimArguments({
             merkleTree,
             recipientInfo,
             tokenDecimals
@@ -299,6 +303,7 @@ async function testIsClaimable(options: {
             await distributer.connect(recipientInfo.connectAs).getIsClaimable(
                 address,
                 amount,
+                uniqueKey,
                 hexProof,
             );
         expect(actualIsClaimable).to.equals(scenariosIsClaimable[index]);

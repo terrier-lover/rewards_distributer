@@ -11,13 +11,25 @@ global.Buffer = require('buffer').Buffer;
 export type RecipientInfoType = {
     address: string,
     rewardAmountWithoutDecimals: number,
+    uniqueKey: string,
 };
 
-function generateLeaf(address: string, rewardAmount: BigNumberType): Buffer {
+export type ClaimArgumentType = {
+    address: string,
+    amount: BigNumberType,
+    uniqueKey: string,
+    hexProof: string[],
+};
+
+function generateLeaf(
+    address: string, 
+    rewardAmount: BigNumberType,
+    uniqueKey: string,
+): Buffer {
     return Buffer.from(
         ethers.utils.solidityKeccak256(
-            ['address', 'uint256'],
-            [address, rewardAmount]
+            ['address', 'uint256', 'string'],
+            [address, rewardAmount, uniqueKey]
         ).slice(2),
         'hex',
     );
@@ -29,13 +41,14 @@ function createMerkleTree(options: {
 }) {
     const { recipientsInfo, tokenDecimals } = options;
     const leaves = recipientsInfo.map(
-        ({ address, rewardAmountWithoutDecimals }) => {
+        ({ address, rewardAmountWithoutDecimals, uniqueKey }) => {
             return generateLeaf(
                 ethers.utils.getAddress(address),
                 getERC20AmountWithDecimalsLight(
                     rewardAmountWithoutDecimals,
                     tokenDecimals,
                 ),
+                uniqueKey,
             );
         }
     );
@@ -47,13 +60,9 @@ function getClaimArguments(options: {
     merkleTree: MerkleTreeType,
     recipientInfo: RecipientInfoType,
     tokenDecimals: number,
-}): {
-    address: string,
-    amount: BigNumberType,
-    hexProof: string[],
-} {
+}): ClaimArgumentType {
     const { merkleTree, recipientInfo, tokenDecimals } = options;
-    const { address, rewardAmountWithoutDecimals } = recipientInfo;
+    const { address, rewardAmountWithoutDecimals, uniqueKey } = recipientInfo;
     const amount = getERC20AmountWithDecimalsLight(
         rewardAmountWithoutDecimals,
         tokenDecimals
@@ -61,9 +70,10 @@ function getClaimArguments(options: {
     const recipientLeaf = generateLeaf(
         address,
         amount,
+        uniqueKey,
     );
     const hexProof = merkleTree.getHexProof(recipientLeaf);
-    return { address, amount, hexProof };
+    return { address, amount, uniqueKey, hexProof };
 }
 
 function getERC20AmountWithDecimalsLight(

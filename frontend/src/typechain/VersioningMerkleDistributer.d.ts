@@ -23,13 +23,15 @@ interface VersioningMerkleDistributerInterface extends ethers.utils.Interface {
   functions: {
     "DEFAULT_ADMIN_ROLE()": FunctionFragment;
     "MODERATOR_ROLE()": FunctionFragment;
-    "claim(address,uint256,bytes32[])": FunctionFragment;
+    "claim(address,uint256,string,bytes32[])": FunctionFragment;
     "currentVersion()": FunctionFragment;
-    "getIsClaimable(uint256,address,uint256,bytes32[])": FunctionFragment;
-    "getIsClaimableOnCurrentVersion(address,uint256,bytes32[])": FunctionFragment;
+    "getIsClaimable(uint256,address,uint256,string,bytes32[])": FunctionFragment;
+    "getIsClaimableOnCurrentVersion(address,uint256,string,bytes32[])": FunctionFragment;
     "getRoleAdmin(bytes32)": FunctionFragment;
     "getRoleMember(bytes32,uint256)": FunctionFragment;
     "getRoleMemberCount(bytes32)": FunctionFragment;
+    "getTokenDecimals()": FunctionFragment;
+    "getTokenSymbol()": FunctionFragment;
     "grantRole(bytes32,address)": FunctionFragment;
     "hasRole(bytes32,address)": FunctionFragment;
     "initialize()": FunctionFragment;
@@ -38,6 +40,7 @@ interface VersioningMerkleDistributerInterface extends ethers.utils.Interface {
     "setCurrentVersion(uint256)": FunctionFragment;
     "setMerkleRoot(bytes32)": FunctionFragment;
     "supportsInterface(bytes4)": FunctionFragment;
+    "token()": FunctionFragment;
     "versionToDetailMap(uint256)": FunctionFragment;
   };
 
@@ -51,7 +54,7 @@ interface VersioningMerkleDistributerInterface extends ethers.utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "claim",
-    values: [string, BigNumberish, BytesLike[]]
+    values: [string, BigNumberish, string, BytesLike[]]
   ): string;
   encodeFunctionData(
     functionFragment: "currentVersion",
@@ -59,11 +62,11 @@ interface VersioningMerkleDistributerInterface extends ethers.utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "getIsClaimable",
-    values: [BigNumberish, string, BigNumberish, BytesLike[]]
+    values: [BigNumberish, string, BigNumberish, string, BytesLike[]]
   ): string;
   encodeFunctionData(
     functionFragment: "getIsClaimableOnCurrentVersion",
-    values: [string, BigNumberish, BytesLike[]]
+    values: [string, BigNumberish, string, BytesLike[]]
   ): string;
   encodeFunctionData(
     functionFragment: "getRoleAdmin",
@@ -76,6 +79,14 @@ interface VersioningMerkleDistributerInterface extends ethers.utils.Interface {
   encodeFunctionData(
     functionFragment: "getRoleMemberCount",
     values: [BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getTokenDecimals",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getTokenSymbol",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "grantRole",
@@ -109,6 +120,7 @@ interface VersioningMerkleDistributerInterface extends ethers.utils.Interface {
     functionFragment: "supportsInterface",
     values: [BytesLike]
   ): string;
+  encodeFunctionData(functionFragment: "token", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "versionToDetailMap",
     values: [BigNumberish]
@@ -147,6 +159,14 @@ interface VersioningMerkleDistributerInterface extends ethers.utils.Interface {
     functionFragment: "getRoleMemberCount",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "getTokenDecimals",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getTokenSymbol",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "grantRole", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "hasRole", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
@@ -167,13 +187,14 @@ interface VersioningMerkleDistributerInterface extends ethers.utils.Interface {
     functionFragment: "supportsInterface",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "token", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "versionToDetailMap",
     data: BytesLike
   ): Result;
 
   events: {
-    "Claim(address,uint256)": EventFragment;
+    "Claim(address,uint256,string)": EventFragment;
     "RoleAdminChanged(bytes32,bytes32,bytes32)": EventFragment;
     "RoleGranted(bytes32,address,address)": EventFragment;
     "RoleRevoked(bytes32,address,address)": EventFragment;
@@ -186,7 +207,11 @@ interface VersioningMerkleDistributerInterface extends ethers.utils.Interface {
 }
 
 export type ClaimEvent = TypedEvent<
-  [string, BigNumber] & { recipient: string; currentAmount: BigNumber }
+  [string, BigNumber, string] & {
+    recipient: string;
+    currentAmount: BigNumber;
+    uniqueKey: string;
+  }
 >;
 
 export type RoleAdminChangedEvent = TypedEvent<
@@ -256,6 +281,7 @@ export class VersioningMerkleDistributer extends BaseContract {
     claim(
       recipient: string,
       amount: BigNumberish,
+      uniqueKey: string,
       proof: BytesLike[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
@@ -266,6 +292,7 @@ export class VersioningMerkleDistributer extends BaseContract {
       version: BigNumberish,
       recipient: string,
       amount: BigNumberish,
+      uniqueKey: string,
       proof: BytesLike[],
       overrides?: CallOverrides
     ): Promise<[boolean, string]>;
@@ -273,6 +300,7 @@ export class VersioningMerkleDistributer extends BaseContract {
     getIsClaimableOnCurrentVersion(
       recipient: string,
       amount: BigNumberish,
+      uniqueKey: string,
       proof: BytesLike[],
       overrides?: CallOverrides
     ): Promise<[boolean, string]>;
@@ -289,6 +317,10 @@ export class VersioningMerkleDistributer extends BaseContract {
       role: BytesLike,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
+
+    getTokenDecimals(overrides?: CallOverrides): Promise<[number]>;
+
+    getTokenSymbol(overrides?: CallOverrides): Promise<[string]>;
 
     grantRole(
       role: BytesLike,
@@ -339,6 +371,8 @@ export class VersioningMerkleDistributer extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
+    token(overrides?: CallOverrides): Promise<[string]>;
+
     versionToDetailMap(
       arg0: BigNumberish,
       overrides?: CallOverrides
@@ -352,6 +386,7 @@ export class VersioningMerkleDistributer extends BaseContract {
   claim(
     recipient: string,
     amount: BigNumberish,
+    uniqueKey: string,
     proof: BytesLike[],
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
@@ -362,6 +397,7 @@ export class VersioningMerkleDistributer extends BaseContract {
     version: BigNumberish,
     recipient: string,
     amount: BigNumberish,
+    uniqueKey: string,
     proof: BytesLike[],
     overrides?: CallOverrides
   ): Promise<[boolean, string]>;
@@ -369,6 +405,7 @@ export class VersioningMerkleDistributer extends BaseContract {
   getIsClaimableOnCurrentVersion(
     recipient: string,
     amount: BigNumberish,
+    uniqueKey: string,
     proof: BytesLike[],
     overrides?: CallOverrides
   ): Promise<[boolean, string]>;
@@ -385,6 +422,10 @@ export class VersioningMerkleDistributer extends BaseContract {
     role: BytesLike,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
+
+  getTokenDecimals(overrides?: CallOverrides): Promise<number>;
+
+  getTokenSymbol(overrides?: CallOverrides): Promise<string>;
 
   grantRole(
     role: BytesLike,
@@ -435,6 +476,8 @@ export class VersioningMerkleDistributer extends BaseContract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
+  token(overrides?: CallOverrides): Promise<string>;
+
   versionToDetailMap(
     arg0: BigNumberish,
     overrides?: CallOverrides
@@ -448,6 +491,7 @@ export class VersioningMerkleDistributer extends BaseContract {
     claim(
       recipient: string,
       amount: BigNumberish,
+      uniqueKey: string,
       proof: BytesLike[],
       overrides?: CallOverrides
     ): Promise<void>;
@@ -458,6 +502,7 @@ export class VersioningMerkleDistributer extends BaseContract {
       version: BigNumberish,
       recipient: string,
       amount: BigNumberish,
+      uniqueKey: string,
       proof: BytesLike[],
       overrides?: CallOverrides
     ): Promise<[boolean, string]>;
@@ -465,6 +510,7 @@ export class VersioningMerkleDistributer extends BaseContract {
     getIsClaimableOnCurrentVersion(
       recipient: string,
       amount: BigNumberish,
+      uniqueKey: string,
       proof: BytesLike[],
       overrides?: CallOverrides
     ): Promise<[boolean, string]>;
@@ -481,6 +527,10 @@ export class VersioningMerkleDistributer extends BaseContract {
       role: BytesLike,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    getTokenDecimals(overrides?: CallOverrides): Promise<number>;
+
+    getTokenSymbol(overrides?: CallOverrides): Promise<string>;
 
     grantRole(
       role: BytesLike,
@@ -529,6 +579,8 @@ export class VersioningMerkleDistributer extends BaseContract {
       overrides?: CallOverrides
     ): Promise<boolean>;
 
+    token(overrides?: CallOverrides): Promise<string>;
+
     versionToDetailMap(
       arg0: BigNumberish,
       overrides?: CallOverrides
@@ -536,20 +588,22 @@ export class VersioningMerkleDistributer extends BaseContract {
   };
 
   filters: {
-    "Claim(address,uint256)"(
+    "Claim(address,uint256,string)"(
       recipient?: string | null,
-      currentAmount?: null
+      currentAmount?: null,
+      uniqueKey?: null
     ): TypedEventFilter<
-      [string, BigNumber],
-      { recipient: string; currentAmount: BigNumber }
+      [string, BigNumber, string],
+      { recipient: string; currentAmount: BigNumber; uniqueKey: string }
     >;
 
     Claim(
       recipient?: string | null,
-      currentAmount?: null
+      currentAmount?: null,
+      uniqueKey?: null
     ): TypedEventFilter<
-      [string, BigNumber],
-      { recipient: string; currentAmount: BigNumber }
+      [string, BigNumber, string],
+      { recipient: string; currentAmount: BigNumber; uniqueKey: string }
     >;
 
     "RoleAdminChanged(bytes32,bytes32,bytes32)"(
@@ -615,6 +669,7 @@ export class VersioningMerkleDistributer extends BaseContract {
     claim(
       recipient: string,
       amount: BigNumberish,
+      uniqueKey: string,
       proof: BytesLike[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
@@ -625,6 +680,7 @@ export class VersioningMerkleDistributer extends BaseContract {
       version: BigNumberish,
       recipient: string,
       amount: BigNumberish,
+      uniqueKey: string,
       proof: BytesLike[],
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -632,6 +688,7 @@ export class VersioningMerkleDistributer extends BaseContract {
     getIsClaimableOnCurrentVersion(
       recipient: string,
       amount: BigNumberish,
+      uniqueKey: string,
       proof: BytesLike[],
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -651,6 +708,10 @@ export class VersioningMerkleDistributer extends BaseContract {
       role: BytesLike,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    getTokenDecimals(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getTokenSymbol(overrides?: CallOverrides): Promise<BigNumber>;
 
     grantRole(
       role: BytesLike,
@@ -700,6 +761,8 @@ export class VersioningMerkleDistributer extends BaseContract {
       interfaceId: BytesLike,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    token(overrides?: CallOverrides): Promise<BigNumber>;
 
     versionToDetailMap(
       arg0: BigNumberish,
@@ -717,6 +780,7 @@ export class VersioningMerkleDistributer extends BaseContract {
     claim(
       recipient: string,
       amount: BigNumberish,
+      uniqueKey: string,
       proof: BytesLike[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
@@ -727,6 +791,7 @@ export class VersioningMerkleDistributer extends BaseContract {
       version: BigNumberish,
       recipient: string,
       amount: BigNumberish,
+      uniqueKey: string,
       proof: BytesLike[],
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
@@ -734,6 +799,7 @@ export class VersioningMerkleDistributer extends BaseContract {
     getIsClaimableOnCurrentVersion(
       recipient: string,
       amount: BigNumberish,
+      uniqueKey: string,
       proof: BytesLike[],
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
@@ -753,6 +819,10 @@ export class VersioningMerkleDistributer extends BaseContract {
       role: BytesLike,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
+
+    getTokenDecimals(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    getTokenSymbol(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     grantRole(
       role: BytesLike,
@@ -802,6 +872,8 @@ export class VersioningMerkleDistributer extends BaseContract {
       interfaceId: BytesLike,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
+
+    token(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     versionToDetailMap(
       arg0: BigNumberish,

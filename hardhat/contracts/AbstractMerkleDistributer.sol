@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
+import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 abstract contract AbstractMerkleDistributer is
     AccessControlEnumerableUpgradeable,
@@ -10,7 +11,13 @@ abstract contract AbstractMerkleDistributer is
 {
     bytes32 public constant MODERATOR_ROLE = keccak256("MODERATOR_ROLE");
 
-    event Claim(address indexed recipient, uint256 currentAmount);
+    IERC20Metadata public token;
+
+    event Claim(
+        address indexed recipient, 
+        uint256 currentAmount, 
+        string uniqueKey
+    );
 
     modifier onlyAdminOrModeratorRoles() {
         require(
@@ -28,6 +35,15 @@ abstract contract AbstractMerkleDistributer is
     function claim(
         address recipient,
         uint256 amount,
+        string memory uniqueKey,
         bytes32[] calldata proof
     ) external virtual;
+
+    function getTokenDecimals() public view returns (uint8) {
+        return token.decimals();
+    }
+
+    function getTokenSymbol() public view returns (string memory) {
+        return token.symbol();
+    }
 }

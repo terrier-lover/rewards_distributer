@@ -2,6 +2,13 @@ import { Link } from '@chakra-ui/react'
 import { ExternalLinkIcon } from '@chakra-ui/icons';
 import FundDistributionCardList from './FundDistributionCardList';
 import nullthrows from 'nullthrows';
+import { 
+  ENV_PREFIX_REACT_APP,
+  NETWORK_NAME_MAINNET,
+  NETWORK_NAME_MATIC,
+  NETWORK_NAME_RINKEBY,
+  NETWORK_NAME_GETH_LOCALHOST,
+} from './CommonVariables';
 
 const ENV = process.env;
 
@@ -30,21 +37,16 @@ const CARD_LISTS = [
 const TOKEN_NAME = "JPYC";
 const TOKEN_IMAGE_URL = 'https://jpyc.jp/static/media/jpyc.0d1e5d3f.png';
 
-const NETWORK_NAME_MAINNET = "mainnet";
-const NETWORK_NAME_MATIC = "matic";
-const NETWORK_NAME_RINKEBY = "rinkeby";
-const NETWORK_NAME_LOCALHOST = "localhost";
-
-const MAINNET_CHAIN_ID = ENV.REACT_APP_MAINNET_CHAIN_ID!;
-const RINKEBY_CHAIN_ID = ENV.REACT_APP_RINKEBY_CHAIN_ID!;
-const MATIC_CHAIN_ID = ENV.REACT_APP_MATIC_CHAIN_ID!;
-const LOCALHOST_CHAIN_ID = ENV.REACT_APP_LOCALHOST_CHAIN_ID!;
+const MAINNET_CHAIN_ID = ENV[`${ENV_PREFIX_REACT_APP}_${NETWORK_NAME_MAINNET.toUpperCase()}_CHAIN_ID`]!;
+const RINKEBY_CHAIN_ID = ENV[`${ENV_PREFIX_REACT_APP}_${NETWORK_NAME_RINKEBY.toUpperCase()}_CHAIN_ID`]!;
+const MATIC_CHAIN_ID = ENV[`${ENV_PREFIX_REACT_APP}_${NETWORK_NAME_MATIC.toUpperCase()}_CHAIN_ID`]!;
+const GETH_LOCALHOST_CHAIN_ID = ENV[`${ENV_PREFIX_REACT_APP}_${NETWORK_NAME_GETH_LOCALHOST.toUpperCase()}_CHAIN_ID`]!;
 
 const CHAINS_IDS_AND_NETWORK_NAME_MAPPINGS = {
   [MAINNET_CHAIN_ID]: NETWORK_NAME_MAINNET,
   [RINKEBY_CHAIN_ID]: NETWORK_NAME_RINKEBY,
   [MATIC_CHAIN_ID]: NETWORK_NAME_MATIC,
-  [LOCALHOST_CHAIN_ID]: NETWORK_NAME_LOCALHOST,
+  [GETH_LOCALHOST_CHAIN_ID]: NETWORK_NAME_GETH_LOCALHOST,
 };
 
 function getContractAddress(currentChainId: number) {
@@ -55,12 +57,10 @@ function getContractAddress(currentChainId: number) {
     "Network name is not defined properly",
   );
 
-  const ERC20_CONTRACT_ADDRESS
-    = ENV[`REACT_APP_${networkName.toUpperCase()}_ERC20_CONTRACT_ADDRESS`]!;
   const DISTRIBUTER_CONTRACT_ADDRESS
     = ENV[`REACT_APP_${networkName.toUpperCase()}_DISTRIBUTER_CONTRACT_ADDRESS`]!;
 
-  return { ERC20_CONTRACT_ADDRESS, DISTRIBUTER_CONTRACT_ADDRESS };
+  return { DISTRIBUTER_CONTRACT_ADDRESS };
 }
 
 const DEFAULT_RETRY: boolean | number = false;
@@ -69,7 +69,7 @@ export {
   MAINNET_CHAIN_ID,
   RINKEBY_CHAIN_ID,
   MATIC_CHAIN_ID,
-  LOCALHOST_CHAIN_ID, 
+  GETH_LOCALHOST_CHAIN_ID, 
   CARD_LISTS,
   TOKEN_NAME,
   TOKEN_IMAGE_URL,

@@ -25,6 +25,12 @@ const _abi = [
         name: "currentAmount",
         type: "uint256",
       },
+      {
+        indexed: false,
+        internalType: "string",
+        name: "uniqueKey",
+        type: "string",
+      },
     ],
     name: "Claim",
     type: "event",
@@ -143,6 +149,11 @@ const _abi = [
         type: "uint256",
       },
       {
+        internalType: "string",
+        name: "uniqueKey",
+        type: "string",
+      },
+      {
         internalType: "bytes32[]",
         name: "proof",
         type: "bytes32[]",
@@ -210,6 +221,32 @@ const _abi = [
         internalType: "uint256",
         name: "",
         type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getTokenDecimals",
+    outputs: [
+      {
+        internalType: "uint8",
+        name: "",
+        type: "uint8",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getTokenSymbol",
+    outputs: [
+      {
+        internalType: "string",
+        name: "",
+        type: "string",
       },
     ],
     stateMutability: "view",
@@ -314,6 +351,19 @@ const _abi = [
         internalType: "bool",
         name: "",
         type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "token",
+    outputs: [
+      {
+        internalType: "contract IERC20Metadata",
+        name: "",
+        type: "address",
       },
     ],
     stateMutability: "view",

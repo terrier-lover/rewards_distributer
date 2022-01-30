@@ -1,7 +1,7 @@
 import type { JsonRpcSigner } from '@ethersproject/providers'
 import type { BigNumber as BigNumberType } from "ethers";
 
-import { Button, useToast } from '@chakra-ui/react';
+import { useToast } from '@chakra-ui/react';
 import {
     MUTATION_KEY_DISTRIBUTE_FLOW,
     QUERY_KEY_DISTRIBUTE_IS_RECIPIENT_CLAIMABLE,
@@ -23,22 +23,28 @@ function FundDistributionClaimRewardsButton({
         rewardAmountWithoutDecimals,
         rewardAmountWithDecimals,
         rewardHexProof,
+        rewardUniqueKey,
         isRecipientClaimable,
-        setIsRecipientClaimable,
+        firstClaimableResultIndex,
     } = useFundDistributionContext();
 
     const { distribute } = getContracts(signer, currentChainId);
     const queryClient = useQueryClient();
 
     useEffect(() => {
+        if (firstClaimableResultIndex < 0) {
+            return;
+        }
+
         const eventKey = 'Claim';
         const listener = (
             _recipient: string,
-            _claimedtAmount: BigNumberType
+            _claimedtAmount: BigNumberType,
+            _uniqueKey: string,
         ) => {
             queryClient.setQueryData(
-                QUERY_KEY_DISTRIBUTE_IS_RECIPIENT_CLAIMABLE,
-                false,
+                `${QUERY_KEY_DISTRIBUTE_IS_RECIPIENT_CLAIMABLE}_${firstClaimableResultIndex}`,
+                [false, "Claimed"],
             );
         };
         distribute.on(eventKey, listener);
@@ -46,7 +52,7 @@ function FundDistributionClaimRewardsButton({
         return () => {
             distribute.removeListener(eventKey, listener);
         };
-    }, [distribute, queryClient]);
+    }, [distribute, queryClient, firstClaimableResultIndex]);
 
     const toast = useToast();
     const [isTransactionWaiting, setIsTransactionWaiting] = useState(false);
@@ -58,6 +64,7 @@ function FundDistributionClaimRewardsButton({
         () => distribute.claim(
             currentAddress,
             rewardAmountWithDecimals,
+            rewardUniqueKey,
             rewardHexProof,
         ),
         {
@@ -66,7 +73,8 @@ function FundDistributionClaimRewardsButton({
                 setIsTransactionWaiting(true);
                 Promise.resolve(tx.wait())
                     .then(_tx => {
-                        setIsRecipientClaimable(false);
+
+                        // TODO: Access QUERY_KEY_DISTRIBUTE_IS_RECIPIENT_CLAIMABLE_X, and modify it. Hope that it triggers the re-render...
                         toast({
                             title: 'Claimed reward!',
                             description: "Your reward was claimed.",

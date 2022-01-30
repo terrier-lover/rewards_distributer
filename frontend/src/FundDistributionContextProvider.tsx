@@ -1,50 +1,38 @@
-import type { Dispatch, SetStateAction } from "react";
-
 import type { BigNumber as BigNumberType } from "ethers";
 import nullthrows from "nullthrows";
 
-import { ReactNode, createContext, useContext, useState } from "react";
+import { ReactNode, createContext, useContext } from "react";
 
 interface FundDistributionContextDataType {
     rewardAmountWithoutDecimals: number;
     rewardAmountWithDecimals: BigNumberType;
     rewardHexProof: string[];
+    rewardUniqueKey: string;
     tokenDecimals: number;
     tokenSimbol: string;
     currentAddress: string;
     currentChainId: number;
     isRecipientClaimable: boolean;
-    setIsRecipientClaimable: Dispatch<SetStateAction<boolean>>,
+    firstClaimableResultIndex: number;
 };
 
 const fundDistributionContextDefaultValue
     : FundDistributionContextDataType | null = null;
 
-const FundDistributionContext = createContext<FundDistributionContextDataType | null>(
-    fundDistributionContextDefaultValue,
-);
-
-type Without<T, K> = Pick<T, Exclude<keyof T, K>>;
+const FundDistributionContext =
+    createContext<FundDistributionContextDataType | null>(
+        fundDistributionContextDefaultValue,
+    );
 
 function FundDistributionContextProvider({
     children,
     contextData,
 }: {
     children: ReactNode,
-    contextData: Without<
-        FundDistributionContextDataType,
-        "setIsRecipientClaimable"
-    >,
+    contextData: FundDistributionContextDataType,
 }) {
-    const [isRecipientClaimable, setIsRecipientClaimable]
-        = useState<boolean>(contextData.isRecipientClaimable);
-
     return (
-        <FundDistributionContext.Provider value={{
-            ...contextData,
-            isRecipientClaimable,
-            setIsRecipientClaimable,
-        }}>
+        <FundDistributionContext.Provider value={contextData}>
             {children}
         </FundDistributionContext.Provider>
     );

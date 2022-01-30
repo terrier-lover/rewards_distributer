@@ -4,27 +4,21 @@ const PATH_TO_HARDHAT_ENV = `${__dirname}/.env`;
 dotenv.config({ path: PATH_TO_HARDHAT_ENV });
 
 const PATH_TO_FRONTEND_ENV = `${__dirname}/./../frontend/.env`;
-const PATH_TO_REACT_ROOT_ADDRESS_AMOUNT_MAP_JSON = `${__dirname}/./../frontend/src/addressAndAmountMap.json`;
+const RAW_RECIPIENTS_INFO_JSON: {
+    address: string, 
+    amount: number, 
+    uniqueKey: string
+}[] 
+    = require(`${__dirname}/rawRecipientsInfo.json`);
+const PATH_TO_REACT_ROOT_RECIPIENTS_INFO_JSON 
+    = `${__dirname}/./../frontend/src/recipientsInfo.json`;
 
 const ENV = process.env;
-const NETWORK_NAME_MAINNET = "mainnet";
-const NETWORK_NAME_MATIC = "matic";
-const NETWORK_NAME_RINKEBY = "rinkeby";
-const NETWORK_NAME_LOCALHOST = "localhost";
-const ENV_PREFIX_REACT_APP = "REACT_APP";
-const ENV_ERC20_CONTRACT_ADDRESS = "ERC20_CONTRACT_ADDRESS";
-const ENV_DISTRIBUTER_CONTRACT_ADDRESS = "DISTRIBUTER_CONTRACT_ADDRESS";
 
 export { 
     ENV,
-    ENV_PREFIX_REACT_APP,
-    ENV_ERC20_CONTRACT_ADDRESS,
-    ENV_DISTRIBUTER_CONTRACT_ADDRESS,
-    NETWORK_NAME_MAINNET, 
-    NETWORK_NAME_MATIC, 
-    NETWORK_NAME_RINKEBY,
-    NETWORK_NAME_LOCALHOST,
     PATH_TO_HARDHAT_ENV,
     PATH_TO_FRONTEND_ENV,
-    PATH_TO_REACT_ROOT_ADDRESS_AMOUNT_MAP_JSON,
+    RAW_RECIPIENTS_INFO_JSON,
+    PATH_TO_REACT_ROOT_RECIPIENTS_INFO_JSON,
 };

@@ -9,7 +9,7 @@ import type {
 } from "@nomiclabs/hardhat-ethers/signers";
 import type { BigNumber as BigNumberType } from "ethers";
 import type { MerkleTree as MerkleTreeType } from 'merkletreejs';
-import type { RecipientInfoType } from './merkleTreeUtils';
+import type { RecipientInfoType } from '../commonVariablesAndFunctionsAdapter';
 
 import { ethers, upgrades, network } from 'hardhat';
 import {
@@ -18,11 +18,15 @@ import {
     TestSimpleMerkleDistributerV2__factory as TestUpgradeableMerkleDistributerV2Factory,
     SimpleToken__factory as SimpleTokenFactory,
 } from '../typechain';
-import { createMerkleTree } from "./merkleTreeUtils";
-import { ENV, ENV_DISTRIBUTER_CONTRACT_ADDRESS, ENV_ERC20_CONTRACT_ADDRESS } from './../settings';
+import { createMerkleTree } from "../commonVariablesAndFunctionsAdapter";
+import { ENV } from './../settings';
 import { readFile, writeFile } from 'fs';
 import { parse, stringify } from 'envfile';
 import { promisify } from "util";
+import { 
+    ENV_ERC20_CONTRACT_ADDRESS,
+    ENV_DISTRIBUTER_CONTRACT_ADDRESS,
+} from "../commonVariablesAndFunctionsAdapter";
 
 async function setEnv(
     keyValueMap: {[key: string]: string},
@@ -37,11 +41,11 @@ async function setEnv(
     await promisify(writeFile)(path, stringify(envData));
 }
 
-async function setAddressAndAmountMappingJson(
-    addressAmountMap: {[key: string]: number},
+async function setRecipientsInfo(
+    recipientsInfo: RecipientInfoType[],
     path: string,
 ) {
-    const json = JSON.stringify(addressAmountMap);
+    const json = JSON.stringify(recipientsInfo);
     await promisify(writeFile)(path, json);
 }
 
@@ -132,24 +136,24 @@ async function formatERC20Amount(
 
 async function initialDeployAndCreateMerkleTree(options: {
     recipientsInfo: RecipientInfoType[],
-    erc20?: ERC20Type,
+    erc20Address?: string | null,
     owner: SignerWithAddressType,
 }): Promise<{
     distributer: DistributerType,
     erc20: ERC20Type,
     merkleTree: MerkleTreeType,
 }> {
-    const { erc20, owner, recipientsInfo } = options;
+    const { erc20Address, owner, recipientsInfo } = options;
 
     let targetERC20: ERC20Type | null = null;
-    if (erc20 == null) {
+    if (erc20Address == null) {
         const simpleToken = await (
             new SimpleTokenFactory(owner).connect(owner).deploy()
         );
         await simpleToken.deployed();
         targetERC20 = simpleToken;
     } else {
-        targetERC20 = erc20;
+        targetERC20 = ERC20Factory.connect(erc20Address, owner);
     }
 
     const tokenDecimals = await targetERC20.decimals();
@@ -195,17 +199,15 @@ async function upgradeToDistributerV2(options: {
 async function getRelevantContracts() {
     const [owner] = await ethers.getSigners();
 
-    if (
-        ERC20_CONTRACT_ADDRESS == null
-        || DISTRIBUTER_CONTRACT_ADDRESS == null
-    ) {
+    if (DISTRIBUTER_CONTRACT_ADDRESS == null) {
         throw new Error('Contracts address are not legit');
     }
 
-    const erc20 = (new ERC20Factory(owner)).attach(ERC20_CONTRACT_ADDRESS);
     const distributer = (
         new DistributerFactory(owner)
     ).attach(DISTRIBUTER_CONTRACT_ADDRESS);
+    const erc20Address = await distributer.token();
+    const erc20 = (new ERC20Factory(owner)).attach(erc20Address);
 
     return { erc20, distributer };
 }
@@ -214,7 +216,7 @@ export {
     ERC20_CONTRACT_ADDRESS,
     DISTRIBUTER_CONTRACT_ADDRESS,
     setEnv,
-    setAddressAndAmountMappingJson,
+    setRecipientsInfo,
     upgradeToDistributerV2,
     formatERC20Amount,
     getERC20AmountWithDecimals,

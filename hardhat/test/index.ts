@@ -11,9 +11,11 @@ import {
   testIsClaimable
 } from "../utils/testUtils";
 
-describe("Distribution test using SimpleMerkleDistributer contract", () => {
+describe("Test using SimpleMerkleDistributer contract", () => {
   const distributerAmountWithoutDecimals = 10000;
   const recipientRewardAmount = 100;
+  const uniqueKey1 = "20220901";
+  const uniqueKey2 = "20230901";
 
   it(
     "Correct flow - one recipient claims reward",
@@ -26,6 +28,7 @@ describe("Distribution test using SimpleMerkleDistributer contract", () => {
           recipientInfo: {
             address: recipient.address,
             rewardAmountWithoutDecimals: recipientRewardAmount,
+            uniqueKey: uniqueKey1,
             connectAs: recipient,
           },
           testScenario: {
@@ -61,6 +64,7 @@ describe("Distribution test using SimpleMerkleDistributer contract", () => {
           recipientInfo: {
             address: recipient1.address,
             rewardAmountWithoutDecimals: recipientRewardAmount,
+            uniqueKey: uniqueKey1,
             connectAs: recipient1,
           },
           testScenario: commonSuccessTestScenario,
@@ -69,6 +73,7 @@ describe("Distribution test using SimpleMerkleDistributer contract", () => {
           recipientInfo: {
             address: recipient2.address,
             rewardAmountWithoutDecimals: recipientRewardAmount + 100,
+            uniqueKey: uniqueKey1,
             connectAs: recipient2,
           },
           testScenario: commonSuccessTestScenario,
@@ -77,6 +82,7 @@ describe("Distribution test using SimpleMerkleDistributer contract", () => {
           recipientInfo: {
             address: recipient3.address,
             rewardAmountWithoutDecimals: recipientRewardAmount + 200,
+            uniqueKey: uniqueKey1,
             connectAs: recipient3,
           },
           testScenario: commonSuccessTestScenario,
@@ -100,6 +106,7 @@ describe("Distribution test using SimpleMerkleDistributer contract", () => {
           recipientInfo: {
             address: recipient.address,
             rewardAmountWithoutDecimals: recipientRewardAmount,
+            uniqueKey: uniqueKey1,
             connectAs: recipient,
           },
           testScenario: {
@@ -139,6 +146,7 @@ describe("Distribution test using SimpleMerkleDistributer contract", () => {
           recipientInfo: {
             address: otherRecipient1InTree.address,
             rewardAmountWithoutDecimals: otherRecipient1RewardAmount,
+            uniqueKey: uniqueKey1,
             connectAs: recipientNotInTree,
           },
           testScenario: {
@@ -153,6 +161,7 @@ describe("Distribution test using SimpleMerkleDistributer contract", () => {
           recipientInfo: {
             address: otherRecipient2InTree.address,
             rewardAmountWithoutDecimals: otherRecipient2RewardAmount,
+            uniqueKey: uniqueKey1,
             connectAs: otherRecipient2InTree,
           },
           testScenario: {
@@ -198,6 +207,7 @@ describe("Distribution test using SimpleMerkleDistributer contract", () => {
           recipientInfo: {
             address: recipient1EligibleForFirstReward.address,
             rewardAmountWithoutDecimals: recipientRewardAmount,
+            uniqueKey: uniqueKey1,
             connectAs: recipient1EligibleForFirstReward,
           },
           testScenario: commonSuccessTestScenario,
@@ -206,6 +216,7 @@ describe("Distribution test using SimpleMerkleDistributer contract", () => {
           recipientInfo: {
             address: recipient2EligibleForFirstReward.address,
             rewardAmountWithoutDecimals: recipientRewardAmount + 100,
+            uniqueKey: uniqueKey1,
             connectAs: recipient2EligibleForFirstReward,
           },
           testScenario: commonSuccessTestScenario,
@@ -214,6 +225,7 @@ describe("Distribution test using SimpleMerkleDistributer contract", () => {
           recipientInfo: {
             address: recipient3EligibleForFirstAndSecondReward.address,
             rewardAmountWithoutDecimals: recipientRewardAmount + 200,
+            uniqueKey: uniqueKey1,
             connectAs: recipient3EligibleForFirstAndSecondReward,
           },
           testScenario: commonSuccessTestScenario,
@@ -232,13 +244,13 @@ describe("Distribution test using SimpleMerkleDistributer contract", () => {
           recipientInfo: {
             address: recipient3EligibleForFirstAndSecondReward.address,
             rewardAmountWithoutDecimals: recipientRewardAmount + 500,
+            uniqueKey: uniqueKey2,
             connectAs: recipient3EligibleForFirstAndSecondReward,
           },
-          // This recipient already claiemd their rewards, so claiming again fails.
           testScenario: {
-            shouldFirstClaimRevert: true,
+            shouldFirstClaimRevert: false,
             shouldSecondClaimRevert: true,
-            isFirstGetClaimable: false,
+            isFirstGetClaimable: true,
             isSecondGetClaimable: false,
           },
         },
@@ -246,6 +258,7 @@ describe("Distribution test using SimpleMerkleDistributer contract", () => {
           recipientInfo: {
             address: recipient4EligibleForSecondReward.address,
             rewardAmountWithoutDecimals: recipientRewardAmount + 600,
+            uniqueKey: uniqueKey1,
             connectAs: recipient4EligibleForSecondReward,
           },
           testScenario: commonSuccessTestScenario,
@@ -254,6 +267,7 @@ describe("Distribution test using SimpleMerkleDistributer contract", () => {
           recipientInfo: {
             address: recipient5EligibleForSecondReward.address,
             rewardAmountWithoutDecimals: recipientRewardAmount + 700,
+            uniqueKey: uniqueKey1,
             connectAs: recipient5EligibleForSecondReward,
           },
           testScenario: commonSuccessTestScenario,
@@ -269,33 +283,34 @@ describe("Distribution test using SimpleMerkleDistributer contract", () => {
         existingContracts: { distributer, erc20 },
       });
 
-      // Test changing hasClaimed value for certain user. 
-      // Set false at hasClaimed for a user who already claimed the rewards.
-      const setHasClaimed = await distributer.setHasClaimedPerRecipient(
-        recipient3EligibleForFirstAndSecondReward.address,
-        false, // newHasClaimed
-      );
-      await setHasClaimed.wait();
+      // // Test changing hasClaimed value for certain user. 
+      // // Set false at hasClaimed for a user who already claimed the rewards.
+      // const setHasClaimed = await distributer.setHasClaimedPerRecipient(
+      //   recipient3EligibleForFirstAndSecondReward.address,
+      //   false, // newHasClaimed
+      // );
+      // await setHasClaimed.wait();
 
-      const thirdTestScenarios = [
-        {
-          recipientInfo: {
-            address: recipient3EligibleForFirstAndSecondReward.address,
-            rewardAmountWithoutDecimals: recipientRewardAmount + 500,
-            connectAs: recipient3EligibleForFirstAndSecondReward,
-          },
-          // This use should be able to claim rewards.
-          testScenario: commonSuccessTestScenario,
-        },
-      ];
-      await testMainFlow({
-        distributerAmountWithoutDecimals,
-        recipientsInfo: thirdTestScenarios.map(el => el.recipientInfo),
-        testScenarios: thirdTestScenarios.map(el => el.testScenario),
-        pastRecipientsInfo: firstTestScenarios.map(el => el.recipientInfo),
-        // When setting existing contracts, it will use these contracts.
-        existingContracts: { distributer, erc20 },
-      });
+      // const thirdTestScenarios = [
+      //   {
+      //     recipientInfo: {
+      //       address: recipient3EligibleForFirstAndSecondReward.address,
+      //       rewardAmountWithoutDecimals: recipientRewardAmount + 500,
+      //       uniqueKey: uniqueKey2,
+      //       connectAs: recipient3EligibleForFirstAndSecondReward,
+      //     },
+      //     // This use should be able to claim rewards.
+      //     testScenario: commonSuccessTestScenario,
+      //   },
+      // ];
+      // await testMainFlow({
+      //   distributerAmountWithoutDecimals,
+      //   recipientsInfo: thirdTestScenarios.map(el => el.recipientInfo),
+      //   testScenarios: thirdTestScenarios.map(el => el.testScenario),
+      //   pastRecipientsInfo: firstTestScenarios.map(el => el.recipientInfo),
+      //   // When setting existing contracts, it will use these contracts.
+      //   existingContracts: { distributer, erc20 },
+      // });
     }
   );
 
@@ -320,6 +335,7 @@ describe("Distribution test using SimpleMerkleDistributer contract", () => {
           recipientInfo: {
             address: recipient1.address,
             rewardAmountWithoutDecimals: recipientRewardAmount,
+            uniqueKey: uniqueKey1,
             connectAs: recipient1,
           },
           testScenario: commonSuccessTestScenarioWithoutWithdrawal,
@@ -328,6 +344,7 @@ describe("Distribution test using SimpleMerkleDistributer contract", () => {
           recipientInfo: {
             address: recipient2.address,
             rewardAmountWithoutDecimals: recipientRewardAmount + 100,
+            uniqueKey: uniqueKey1,
             connectAs: recipient2,
           },
           testScenario: commonSuccessTestScenarioWithoutWithdrawal,
@@ -336,6 +353,7 @@ describe("Distribution test using SimpleMerkleDistributer contract", () => {
           recipientInfo: {
             address: recipient3.address,
             rewardAmountWithoutDecimals: recipientRewardAmount + 200,
+            uniqueKey: uniqueKey1,
             connectAs: recipient3,
           },
           testScenario: commonSuccessTestScenarioWithoutWithdrawal,

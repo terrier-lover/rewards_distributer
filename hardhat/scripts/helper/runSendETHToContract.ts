@@ -2,7 +2,7 @@ import { ethers as hardhatEthers } from "hardhat";
 import { utils } from 'ethers';
 
 const AMOUNT_WITHOUT_DECIMALS = "0.1";
-const RECIPIENT = "..."; // Specify address
+const RECIPIENT = "0x3b1F26390Db8dD9166D1a03c1499d7FBB6615f1F"; // Specify address
 
 async function main() {
     const [ owner ] = await hardhatEthers.getSigners();

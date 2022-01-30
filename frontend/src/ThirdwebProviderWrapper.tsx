@@ -4,7 +4,7 @@ import {
   MAINNET_CHAIN_ID,
   RINKEBY_CHAIN_ID,
   MATIC_CHAIN_ID,
-  LOCALHOST_CHAIN_ID,   
+  GETH_LOCALHOST_CHAIN_ID,   
 } from './DefaultSettings';
 
 function notEmpty<TValue>(value: TValue | null | undefined): value is TValue {
@@ -19,7 +19,7 @@ function ThirdwebProviderWrapper(props: {
     MAINNET_CHAIN_ID,
     RINKEBY_CHAIN_ID,
     MATIC_CHAIN_ID,
-    LOCALHOST_CHAIN_ID,
+    GETH_LOCALHOST_CHAIN_ID,
   ].filter(notEmpty).map(val => parseInt(val));
   /**
    * Include the connectors you want to support

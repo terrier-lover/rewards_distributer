@@ -5,7 +5,7 @@ import { CARD_LISTS } from './DefaultSettings';
 import { useFundDistributionContext } from './FundDistributionContextProvider';
 import FundDistributionCardHeadlinePill from './FundDistributionCardHeadlinePill';
 
-function FundDistributionCard({buttonNode,}: {buttonNode: React.ReactNode,}) {
+function FundDistributionCard({buttonNode}: {buttonNode: React.ReactNode,}) {
     const {
         rewardAmountWithoutDecimals, 
         tokenSimbol,

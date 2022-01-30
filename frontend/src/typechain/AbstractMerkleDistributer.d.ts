@@ -23,16 +23,19 @@ interface AbstractMerkleDistributerInterface extends ethers.utils.Interface {
   functions: {
     "DEFAULT_ADMIN_ROLE()": FunctionFragment;
     "MODERATOR_ROLE()": FunctionFragment;
-    "claim(address,uint256,bytes32[])": FunctionFragment;
+    "claim(address,uint256,string,bytes32[])": FunctionFragment;
     "getRoleAdmin(bytes32)": FunctionFragment;
     "getRoleMember(bytes32,uint256)": FunctionFragment;
     "getRoleMemberCount(bytes32)": FunctionFragment;
+    "getTokenDecimals()": FunctionFragment;
+    "getTokenSymbol()": FunctionFragment;
     "grantRole(bytes32,address)": FunctionFragment;
     "hasRole(bytes32,address)": FunctionFragment;
     "initialize()": FunctionFragment;
     "renounceRole(bytes32,address)": FunctionFragment;
     "revokeRole(bytes32,address)": FunctionFragment;
     "supportsInterface(bytes4)": FunctionFragment;
+    "token()": FunctionFragment;
   };
 
   encodeFunctionData(
@@ -45,7 +48,7 @@ interface AbstractMerkleDistributerInterface extends ethers.utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "claim",
-    values: [string, BigNumberish, BytesLike[]]
+    values: [string, BigNumberish, string, BytesLike[]]
   ): string;
   encodeFunctionData(
     functionFragment: "getRoleAdmin",
@@ -58,6 +61,14 @@ interface AbstractMerkleDistributerInterface extends ethers.utils.Interface {
   encodeFunctionData(
     functionFragment: "getRoleMemberCount",
     values: [BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getTokenDecimals",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getTokenSymbol",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "grantRole",
@@ -83,6 +94,7 @@ interface AbstractMerkleDistributerInterface extends ethers.utils.Interface {
     functionFragment: "supportsInterface",
     values: [BytesLike]
   ): string;
+  encodeFunctionData(functionFragment: "token", values?: undefined): string;
 
   decodeFunctionResult(
     functionFragment: "DEFAULT_ADMIN_ROLE",
@@ -105,6 +117,14 @@ interface AbstractMerkleDistributerInterface extends ethers.utils.Interface {
     functionFragment: "getRoleMemberCount",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "getTokenDecimals",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getTokenSymbol",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "grantRole", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "hasRole", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
@@ -117,9 +137,10 @@ interface AbstractMerkleDistributerInterface extends ethers.utils.Interface {
     functionFragment: "supportsInterface",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "token", data: BytesLike): Result;
 
   events: {
-    "Claim(address,uint256)": EventFragment;
+    "Claim(address,uint256,string)": EventFragment;
     "RoleAdminChanged(bytes32,bytes32,bytes32)": EventFragment;
     "RoleGranted(bytes32,address,address)": EventFragment;
     "RoleRevoked(bytes32,address,address)": EventFragment;
@@ -132,7 +153,11 @@ interface AbstractMerkleDistributerInterface extends ethers.utils.Interface {
 }
 
 export type ClaimEvent = TypedEvent<
-  [string, BigNumber] & { recipient: string; currentAmount: BigNumber }
+  [string, BigNumber, string] & {
+    recipient: string;
+    currentAmount: BigNumber;
+    uniqueKey: string;
+  }
 >;
 
 export type RoleAdminChangedEvent = TypedEvent<
@@ -202,6 +227,7 @@ export class AbstractMerkleDistributer extends BaseContract {
     claim(
       recipient: string,
       amount: BigNumberish,
+      uniqueKey: string,
       proof: BytesLike[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
@@ -218,6 +244,10 @@ export class AbstractMerkleDistributer extends BaseContract {
       role: BytesLike,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
+
+    getTokenDecimals(overrides?: CallOverrides): Promise<[number]>;
+
+    getTokenSymbol(overrides?: CallOverrides): Promise<[string]>;
 
     grantRole(
       role: BytesLike,
@@ -251,6 +281,8 @@ export class AbstractMerkleDistributer extends BaseContract {
       interfaceId: BytesLike,
       overrides?: CallOverrides
     ): Promise<[boolean]>;
+
+    token(overrides?: CallOverrides): Promise<[string]>;
   };
 
   DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
@@ -260,6 +292,7 @@ export class AbstractMerkleDistributer extends BaseContract {
   claim(
     recipient: string,
     amount: BigNumberish,
+    uniqueKey: string,
     proof: BytesLike[],
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
@@ -276,6 +309,10 @@ export class AbstractMerkleDistributer extends BaseContract {
     role: BytesLike,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
+
+  getTokenDecimals(overrides?: CallOverrides): Promise<number>;
+
+  getTokenSymbol(overrides?: CallOverrides): Promise<string>;
 
   grantRole(
     role: BytesLike,
@@ -310,6 +347,8 @@ export class AbstractMerkleDistributer extends BaseContract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
+  token(overrides?: CallOverrides): Promise<string>;
+
   callStatic: {
     DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
 
@@ -318,6 +357,7 @@ export class AbstractMerkleDistributer extends BaseContract {
     claim(
       recipient: string,
       amount: BigNumberish,
+      uniqueKey: string,
       proof: BytesLike[],
       overrides?: CallOverrides
     ): Promise<void>;
@@ -334,6 +374,10 @@ export class AbstractMerkleDistributer extends BaseContract {
       role: BytesLike,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    getTokenDecimals(overrides?: CallOverrides): Promise<number>;
+
+    getTokenSymbol(overrides?: CallOverrides): Promise<string>;
 
     grantRole(
       role: BytesLike,
@@ -365,23 +409,27 @@ export class AbstractMerkleDistributer extends BaseContract {
       interfaceId: BytesLike,
       overrides?: CallOverrides
     ): Promise<boolean>;
+
+    token(overrides?: CallOverrides): Promise<string>;
   };
 
   filters: {
-    "Claim(address,uint256)"(
+    "Claim(address,uint256,string)"(
       recipient?: string | null,
-      currentAmount?: null
+      currentAmount?: null,
+      uniqueKey?: null
     ): TypedEventFilter<
-      [string, BigNumber],
-      { recipient: string; currentAmount: BigNumber }
+      [string, BigNumber, string],
+      { recipient: string; currentAmount: BigNumber; uniqueKey: string }
     >;
 
     Claim(
       recipient?: string | null,
-      currentAmount?: null
+      currentAmount?: null,
+      uniqueKey?: null
     ): TypedEventFilter<
-      [string, BigNumber],
-      { recipient: string; currentAmount: BigNumber }
+      [string, BigNumber, string],
+      { recipient: string; currentAmount: BigNumber; uniqueKey: string }
     >;
 
     "RoleAdminChanged(bytes32,bytes32,bytes32)"(
@@ -447,6 +495,7 @@ export class AbstractMerkleDistributer extends BaseContract {
     claim(
       recipient: string,
       amount: BigNumberish,
+      uniqueKey: string,
       proof: BytesLike[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
@@ -466,6 +515,10 @@ export class AbstractMerkleDistributer extends BaseContract {
       role: BytesLike,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    getTokenDecimals(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getTokenSymbol(overrides?: CallOverrides): Promise<BigNumber>;
 
     grantRole(
       role: BytesLike,
@@ -499,6 +552,8 @@ export class AbstractMerkleDistributer extends BaseContract {
       interfaceId: BytesLike,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    token(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   populateTransaction: {
@@ -511,6 +566,7 @@ export class AbstractMerkleDistributer extends BaseContract {
     claim(
       recipient: string,
       amount: BigNumberish,
+      uniqueKey: string,
       proof: BytesLike[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
@@ -530,6 +586,10 @@ export class AbstractMerkleDistributer extends BaseContract {
       role: BytesLike,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
+
+    getTokenDecimals(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    getTokenSymbol(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     grantRole(
       role: BytesLike,
@@ -563,5 +623,7 @@ export class AbstractMerkleDistributer extends BaseContract {
       interfaceId: BytesLike,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
+
+    token(overrides?: CallOverrides): Promise<PopulatedTransaction>;
   };
 }
