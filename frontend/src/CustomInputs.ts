@@ -30,7 +30,7 @@ const SUPPORTED_CHAIN_IDS_IN_WEB = [
     CHAIN_IDS.MAINNET,
     CHAIN_IDS.RINKEBY,
     CHAIN_IDS.MATIC,
-    CHAIN_IDS.GETH_LOCALHOST,
+    // CHAIN_IDS.GETH_LOCALHOST, // Comment out when testing on geth network.
 ];
 
 export {
