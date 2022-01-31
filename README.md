@@ -53,9 +53,15 @@ Following files must be updated prioer to the installation process.
 - hardhat/hardhat.config.ts
   - Set appropriate values for config variable
 - frontend/src/CustomInputs.ts
-  - TOKEN_IMAGE_URL: _required_ Set image used in the website
-  - SUPPORTED_CHAIN_IDS_IN_WEB: _required_ Chain IDs which should be shown in the website
-  - NETWORK_NAMES, CHAIN_IDS, CHAINS_IDS_AND_NETWORK_NAME_MAPPINGS: _optional_ Definitions of network and chainIds 
+  - TOKEN_IMAGE_URL
+    - _required_ 
+    - Set image used in the website
+  - SUPPORTED_CHAIN_IDS_IN_WEB
+    - _required_ 
+    - Chain IDs which should be shown in the website
+  - NETWORK_NAMES, CHAIN_IDS, CHAINS_IDS_AND_NETWORK_NAME_MAPPINGS
+    - _optional_ 
+    - Definitions of network and chainIds 
 
 ## Hardhat & Frontend, npm installation
 - $ cd frontend
