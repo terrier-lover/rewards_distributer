@@ -28,24 +28,49 @@ Versioning Distributer is designed to accomodate more compilicated cases such as
 See [this demo page](https://github.com/terrier-lover/rewards_distributer/blob/main/demo/README.md)
 
 # How to install
-- git clone https://github.com/terrier-lover/rewards_distributer.git
+- $ git clone https://github.com/terrier-lover/rewards_distributer.git
+
+## Preparation
+Following files must be updated prioer to the installation process.
+- hardhat/.env
+  - \*\*\*_URL
+    - **_required_**
+    - Set URL of RPC network that you want to use (For example, Alchemy or others). 
+  - \*\*\*_ERC20_CONTRACT_ADDRESS
+    - _**required** when setting own ERC20 token_ 
+    - This is required when setting own ERC20 token. 
+  - \*\*\*_PRIVATE_KEY_OWNER
+    - _**required** for non-localhost_
+    - Set private key of main account. This account will deploy contracts, so it needs to have enough tokens which are needed for the deployment. 
+  - \*\*\*_PRIVATE_KEY_OTHER1
+    - **_optional_**
+    - Set private key of other account. Not required.
+- hardhat/rawRecipientsInfo.json
+  - Specify information of recipients. Set following values:
+    - address: address of recipient
+    - amount: reward amount for recipient. 
+    - uniqueKey: To handle duplications of recipients, specify unique key for the pair of address and amount (*1) 
+- hardhat/hardhat.config.ts
+  - Set appropriate values for config variable
+- frontend/src/CustomInputs.ts
+  - TOKEN_IMAGE_URL: _required_ Set image used in the website
+  - SUPPORTED_CHAIN_IDS_IN_WEB: _required_ Chain IDs which should be shown in the website
+  - NETWORK_NAMES, CHAIN_IDS, CHAINS_IDS_AND_NETWORK_NAME_MAPPINGS: _optional_ Definitions of network and chainIds 
 
 ## Hardhat
 - $ cd hardhat 
 - $ npm install
-- Prepare .env using .env.example. Do not need to put value in ...\_CONTRACT_ADDRESS variable if using SimpleToken contract defined here. If you want to use specific token, set its address at ERC20_CONTRACT_ADDRESS. Also do not need to put private keys for chains that you do not use. When you just need to use rinkeby, just add the private address of your wallets on RINKEBY_.... 
+- Prepare .env using .env.example.  
 
 If you want to use localnet, do followings:
 - $ npx hardhat node
 - $ npx hardhat run scripts/deploy.ts --network localhost
-- $ npx hardhat run scripts/helper/runSendETHToContract.ts --network localhost * # Change hardcoded variable of address in runSendETHToContract.ts *
 
 Whenever hardhat compiles and produces new typechains (this is exported under ./hardhat/typechain), copy typechains in hardhat/typechain/ to /frontend/src/typechain/ so that frontend code can use latest definitions. In addition, change the front-end codebase accordingly.
 
 ## Frontend
 - $ cd frontend
 - $ npm install
-- Prepare .env using .env.example. Do not need to put value in ...\_CONTRACT_ADDRESS variable
 - $ npm start
 
 # How to test
@@ -57,13 +82,6 @@ Whenever hardhat compiles and produces new typechains (this is exported under ./
   - Feel free to create issues [here](https://github.com/terrier-lover/rewards_distributer/issues)
 - Add more test cases
 - Support Matic network
-- Feature updates
-  - Support Versioning Distributer functionalities mentioned above
-  - Potentially others
-- Misc
-  - Change icon
-  - Have better way to manage env files
-  - Clean up codebase in frontend and hardhat directory
  
 ## References
 - [Uniswap Merkle Distributer implementation](https://github.com/Uniswap/merkle-distributor)
