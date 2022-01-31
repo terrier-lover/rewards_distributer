@@ -18,11 +18,12 @@ import {
 import { expect } from "chai";
 import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
-import { 
-    createMerkleTree, 
-    getClaimArguments, 
-    RecipientInfoType 
-} from "../commonVariablesAndFunctionsAdapter";
+import { COMMON_VARIABLES_AND_FUNCTIONS, RecipientInfoType } from "../settings";
+
+const {
+    createMerkleTree,
+    getClaimArguments,
+} = COMMON_VARIABLES_AND_FUNCTIONS;
 
 type TestScenariosType = {
     shouldFirstClaimRevert: boolean,
@@ -299,7 +300,7 @@ async function testIsClaimable(options: {
             recipientInfo,
             tokenDecimals
         });
-        const [actualIsClaimable, _] = 
+        const [actualIsClaimable, _] =
             await distributer.connect(recipientInfo.connectAs).getIsClaimable(
                 address,
                 amount,

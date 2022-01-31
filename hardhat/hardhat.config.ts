@@ -7,6 +7,7 @@ import "@typechain/hardhat";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
 import { ENV } from './settings';
+import { COMMON_VARIABLES_AND_FUNCTIONS } from './settings';
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -29,15 +30,16 @@ const config: HardhatUserConfig = {
       url: ENV.RINKEBY_URL || "",
       accounts:
         [
-          ENV.RINKEBY_PRIVATE_KEY_OWNER == null 
-            ? null: ENV.RINKEBY_PRIVATE_KEY_OWNER,
-            ENV.RINKEBY_PRIVATE_KEY_OTHER1 == null 
-            ? null: ENV.RINKEBY_PRIVATE_KEY_OTHER1,
+          ENV.RINKEBY_PRIVATE_KEY_OWNER == null
+            ? null : ENV.RINKEBY_PRIVATE_KEY_OWNER,
+          ENV.RINKEBY_PRIVATE_KEY_OTHER1 == null
+            ? null : ENV.RINKEBY_PRIVATE_KEY_OTHER1,
         ].filter(notEmpty),
+      chainId: COMMON_VARIABLES_AND_FUNCTIONS.CHAIN_IDS.RINKEBY,
     },
     geth_localhost: {
       url: "http://127.0.0.1:8545",
-      chainId: 31337,
+      chainId: COMMON_VARIABLES_AND_FUNCTIONS.CHAIN_IDS.GETH_LOCALHOST,
     },
   },
   gasReporter: {

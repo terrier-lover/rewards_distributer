@@ -1,7 +1,7 @@
-import { getRelevantContracts} from "../../utils/contractUtils";
+import { getRelevantContracts } from "../../utils/contractUtils";
 
 // Specify amounts which will be passed to holder contract
-const RECIPIENT_ADDRESS = "0x3b1F26390Db8dD9166D1a03c1499d7FBB6615f1F";
+const RECIPIENT_ADDRESS = "0xCDB80835Ed75e8ADe4B4F8ea2969cDf189a9acc8";
 const RECIPIENT_UNIQUE_KEY = "20210401";
 
 async function main() {

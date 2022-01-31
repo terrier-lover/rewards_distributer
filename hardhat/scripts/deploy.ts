@@ -1,3 +1,5 @@
+import type { RecipientInfoType } from "../settings";
+
 import {
     formatERC20Amount,
     initialDeployAndCreateMerkleTree,
@@ -5,29 +7,30 @@ import {
     mintSimpleToken,
     setEnv,
     setRecipientsInfo,
+    ERC20_CONTRACT_ADDRESS,
 } from "../utils/contractUtils";
 import { ethers, network } from "hardhat";
-import { getClaimArguments } from "../commonVariablesAndFunctionsAdapter";
 import {
     PATH_TO_HARDHAT_ENV,
     PATH_TO_FRONTEND_ENV,
     RAW_RECIPIENTS_INFO_JSON,
     PATH_TO_REACT_ROOT_RECIPIENTS_INFO_JSON,
 } from "../settings";
-import {
-    RecipientInfoType,
+import { COMMON_VARIABLES_AND_FUNCTIONS } from "../settings";
+
+const {
+    getClaimArguments,
     ENV_PREFIX_REACT_APP,
-    ENV_ERC20_CONTRACT_ADDRESS,
     ENV_DISTRIBUTER_CONTRACT_ADDRESS,
-} from "../commonVariablesAndFunctionsAdapter";
+} = COMMON_VARIABLES_AND_FUNCTIONS;
 
 /***** Change following values based on your needs *****/
-const INITIAL_MINT_AMOUNT_WITHOUT_DECIMALS = 10000;
+const INITIAL_MINT_AMOUNT_WITHOUT_DECIMALS = 1000;
 const SHOULD_RECIPIENT_CLAIM_REWARD = false;
 const SHOULD_GENERATE_ENV_FILE = true;
 const SHOULD_GENERATE_JSON_FOR_TARGET_RECIPIENTS = true;
 const SHOULD_USE_JSON_FOR_TARGET_RECIPIENTS = true;
-const SHOULD_USE_EXTERNAL_ERC20_TOKEN = false;
+const SHOULD_USE_EXTERNAL_ERC20_TOKEN = false; // Set true if you want to use external token address
 
 /*
  * This script deploys contracts using ERC20 token. In local mode, it uses
@@ -64,15 +67,15 @@ async function main() {
         );
     }
 
-    const targetERC20TokenAddress = SHOULD_USE_EXTERNAL_ERC20_TOKEN 
-        ? `${network.name.toUpperCase()}_${ENV_ERC20_CONTRACT_ADDRESS}`
+    const targetERC20TokenAddress = SHOULD_USE_EXTERNAL_ERC20_TOKEN
+        ? ERC20_CONTRACT_ADDRESS!
         : null;
 
     const { distributer, erc20, merkleTree } =
-        await initialDeployAndCreateMerkleTree({ 
-            owner, 
+        await initialDeployAndCreateMerkleTree({
+            owner,
             recipientsInfo,
-            erc20Address: targetERC20TokenAddress, 
+            erc20Address: targetERC20TokenAddress,
         });
 
     console.log(`ERC20 contract deployed to ${erc20.address}`);
@@ -104,7 +107,7 @@ async function main() {
 
     const tokenDecimals = await erc20.decimals();
 
-    const recipientsOperation = recipientsInfo.map(async (recipientInfo, index) => {
+    const recipientsOperation = recipientsInfo.map(async recipientInfo => {
         const { address, amount, uniqueKey, hexProof } = getClaimArguments({
             merkleTree,
             recipientInfo,
@@ -113,7 +116,7 @@ async function main() {
         const [isClaimable, _] = await distributer.connect(
             recipientInfo.address,
         ).getIsClaimable(address, amount, uniqueKey, hexProof);
-        console.log(`Can recipient${index} claim reward? ${isClaimable ? "Yes" : "No"}`);
+        console.log(`Can recipient=${address} claim amount=${recipientInfo.rewardAmountWithoutDecimals}? ${isClaimable ? "Yes" : "No"}`);
 
         if (SHOULD_RECIPIENT_CLAIM_REWARD && !SHOULD_USE_JSON_FOR_TARGET_RECIPIENTS) {
             console.log('Claiming reward as a recipient');
@@ -171,7 +174,7 @@ async function main() {
 }
 
 function getYesOrNo(value: boolean) {
-    return value ? "Yes": "No";
+    return value ? "Yes" : "No";
 }
 
 main().catch((error) => {

@@ -1,5 +1,5 @@
 import type { JsonRpcSigner } from '@ethersproject/providers'
-import type {SimpleMerkleDistributer as DistributerType} from "./typechain";
+import type { SimpleMerkleDistributer as DistributerType } from "./typechain";
 import type { BigNumber as BigNumberType } from "ethers";
 import {
     createMerkleTree,
@@ -10,7 +10,6 @@ import recipientsInfoJson from './recipientsInfo.json';
 import * as ethers from "ethers";
 import {
     SimpleMerkleDistributer__factory as DistributerFactory,
-    ERC20__factory as ERC20Factory,
 } from './typechain';
 
 import { getContractAddress } from './DefaultSettings';

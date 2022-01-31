@@ -9,7 +9,7 @@ import type {
 } from "@nomiclabs/hardhat-ethers/signers";
 import type { BigNumber as BigNumberType } from "ethers";
 import type { MerkleTree as MerkleTreeType } from 'merkletreejs';
-import type { RecipientInfoType } from '../commonVariablesAndFunctionsAdapter';
+import type { RecipientInfoType } from '../settings';
 
 import { ethers, upgrades, network } from 'hardhat';
 import {
@@ -18,21 +18,23 @@ import {
     TestSimpleMerkleDistributerV2__factory as TestUpgradeableMerkleDistributerV2Factory,
     SimpleToken__factory as SimpleTokenFactory,
 } from '../typechain';
-import { createMerkleTree } from "../commonVariablesAndFunctionsAdapter";
 import { ENV } from './../settings';
 import { readFile, writeFile } from 'fs';
 import { parse, stringify } from 'envfile';
 import { promisify } from "util";
-import { 
+import { COMMON_VARIABLES_AND_FUNCTIONS } from "../settings";
+
+const {
+    createMerkleTree,
     ENV_ERC20_CONTRACT_ADDRESS,
     ENV_DISTRIBUTER_CONTRACT_ADDRESS,
-} from "../commonVariablesAndFunctionsAdapter";
+} = COMMON_VARIABLES_AND_FUNCTIONS;
 
 async function setEnv(
-    keyValueMap: {[key: string]: string},
+    keyValueMap: { [key: string]: string },
     path: string,
 ) {
-    const envRawData = await promisify(readFile)(path, {encoding: 'utf-8'});
+    const envRawData = await promisify(readFile)(path, { encoding: 'utf-8' });
     const envData = parse(envRawData);
     Object.keys(keyValueMap).forEach(key => {
         envData[key] = keyValueMap[key];
@@ -50,16 +52,21 @@ async function setRecipientsInfo(
 }
 
 function getContractAddress() {
-    const ERC20_CONTRACT_ADDRESS 
-        = ENV[`${network.name.toUpperCase()}_${ENV_ERC20_CONTRACT_ADDRESS}`]!;
+    const ERC20_CONTRACT_ADDRESS = getERC20ContractAddress();
     const DISTRIBUTER_CONTRACT_ADDRESS
-        = ENV[`${network.name.toUpperCase()}_${ENV_DISTRIBUTER_CONTRACT_ADDRESS}`]!;
+        = ENV[`${network.name.toUpperCase()}_${ENV_DISTRIBUTER_CONTRACT_ADDRESS}`] ?? null;
 
     return { ERC20_CONTRACT_ADDRESS, DISTRIBUTER_CONTRACT_ADDRESS };
 }
 
+function getERC20ContractAddress() {
+    const ERC20_CONTRACT_ADDRESS
+        = ENV[`${network.name.toUpperCase()}_${ENV_ERC20_CONTRACT_ADDRESS}`] ?? null;
+    return ERC20_CONTRACT_ADDRESS;
+}
+
 const {
-    ERC20_CONTRACT_ADDRESS, 
+    ERC20_CONTRACT_ADDRESS,
     DISTRIBUTER_CONTRACT_ADDRESS,
 } = getContractAddress();
 
@@ -225,4 +232,5 @@ export {
     initialDeployAndCreateMerkleTree,
     transferERC20,
     mintSimpleToken,
+    getERC20ContractAddress,
 };

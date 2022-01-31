@@ -9,11 +9,7 @@ import {
 } from '@chakra-ui/react';
 import { useBreakpointValue } from '@chakra-ui/media-query'
 
-function Header(props: {
-    tokenName: string,
-    tokenImageURL: string,
-}) {
-    const { tokenName, tokenImageURL } = props;
+function Header({ tokenImageURL }: { tokenImageURL: string }) {
     const avatarSize = useBreakpointValue({ base: 'xs', md: 'xs', lg: 'sm' });
 
     return (
@@ -24,7 +20,6 @@ function Header(props: {
                 <HStack spacing={{ base: 2, md: 3, lg: 4 }} alignItems={'center'}>
                     <Avatar
                         size={avatarSize}
-                        name={tokenName}
                         src={tokenImageURL}
                         marginTop="4px"
                     />
