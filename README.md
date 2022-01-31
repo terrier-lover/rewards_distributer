@@ -49,7 +49,7 @@ Following files must be updated prioer to the installation process.
   - Specify information of recipients. Set following values:
     - address: address of recipient
     - amount: reward amount for recipient. 
-    - uniqueKey: To handle duplications of recipients, specify unique key for the pair of address and amount. Please see (the detail of the data structure)[https://gist.github.com/terrier-lover/80a2fb07320248a5a5de06b75caa0aed] used in this contract.
+    - uniqueKey: To handle duplications of recipients, specify unique key for the pair of address and amount. Please see [the detail of the data structure](https://gist.github.com/terrier-lover/80a2fb07320248a5a5de06b75caa0aed) used in this contract.
 - hardhat/hardhat.config.ts
   - Set appropriate values for config variable
 - frontend/src/CustomInputs.ts
