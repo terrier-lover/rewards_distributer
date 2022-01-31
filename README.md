@@ -57,9 +57,14 @@ Following files must be updated prioer to the installation process.
   - SUPPORTED_CHAIN_IDS_IN_WEB: _required_ Chain IDs which should be shown in the website
   - NETWORK_NAMES, CHAIN_IDS, CHAINS_IDS_AND_NETWORK_NAME_MAPPINGS: _optional_ Definitions of network and chainIds 
 
-## Hardhat
-- $ cd hardhat 
+## Hardhat & Frontend, npm installation
+- $ cd frontend
 - $ npm install
+- $ cd hardhat
+- $ npm install
+
+## Hardhat, deploy
+- $ cd hardhat 
 - Prepare .env using .env.example.  
 
 If you want to use localnet, do followings:
@@ -68,9 +73,8 @@ If you want to use localnet, do followings:
 
 Whenever hardhat compiles and produces new typechains (this is exported under ./hardhat/typechain), copy typechains in hardhat/typechain/ to /frontend/src/typechain/ so that frontend code can use latest definitions. In addition, change the front-end codebase accordingly.
 
-## Frontend
+## Frontend, prepare webserver
 - $ cd frontend
-- $ npm install
 - $ npm start
 
 # How to test
