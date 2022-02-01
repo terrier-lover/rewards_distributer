@@ -25,7 +25,10 @@ Versioning Distributer is designed to accomodate more compilicated cases such as
 - Specs TBD...
 
 # Demo
-See [this demo page](https://github.com/terrier-lover/rewards_distributer/blob/main/demo/README.md)
+[demo website](https://terrier-lover.github.io/rewards_distributer/)
+- If you want to receive USDC on Rinkeby network, please add your request [here](https://github.com/terrier-lover/rewards_distributer/issues/2)
+
+[demo images](https://github.com/terrier-lover/rewards_distributer/blob/main/demo/README.md)
 
 # How to install
 - $ git clone https://github.com/terrier-lover/rewards_distributer.git
