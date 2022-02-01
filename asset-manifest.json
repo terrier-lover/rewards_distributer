@@ -1,29 +1,29 @@
 {
   "files": {
-    "main.css": "/terrier-lover/rewards_distributer/static/css/main.e6c13ad2.css",
-    "main.js": "/terrier-lover/rewards_distributer/static/js/main.0cb13f82.js",
-    "static/js/780.55757f36.chunk.js": "/terrier-lover/rewards_distributer/static/js/780.55757f36.chunk.js",
-    "static/js/538.eada4359.chunk.js": "/terrier-lover/rewards_distributer/static/js/538.eada4359.chunk.js",
-    "static/js/915.fc3f30b8.chunk.js": "/terrier-lover/rewards_distributer/static/js/915.fc3f30b8.chunk.js",
-    "static/js/787.c39012cf.chunk.js": "/terrier-lover/rewards_distributer/static/js/787.c39012cf.chunk.js",
-    "static/js/668.88c218bb.chunk.js": "/terrier-lover/rewards_distributer/static/js/668.88c218bb.chunk.js",
-    "static/js/602.14288a59.chunk.js": "/terrier-lover/rewards_distributer/static/js/602.14288a59.chunk.js",
-    "static/js/563.ad1c2bc8.chunk.js": "/terrier-lover/rewards_distributer/static/js/563.ad1c2bc8.chunk.js",
-    "static/js/196.42c61156.chunk.js": "/terrier-lover/rewards_distributer/static/js/196.42c61156.chunk.js",
-    "static/js/986.221c734d.chunk.js": "/terrier-lover/rewards_distributer/static/js/986.221c734d.chunk.js",
-    "index.html": "/terrier-lover/rewards_distributer/index.html",
-    "main.e6c13ad2.css.map": "/terrier-lover/rewards_distributer/static/css/main.e6c13ad2.css.map",
-    "main.0cb13f82.js.map": "/terrier-lover/rewards_distributer/static/js/main.0cb13f82.js.map",
-    "780.55757f36.chunk.js.map": "/terrier-lover/rewards_distributer/static/js/780.55757f36.chunk.js.map",
-    "538.eada4359.chunk.js.map": "/terrier-lover/rewards_distributer/static/js/538.eada4359.chunk.js.map",
-    "915.fc3f30b8.chunk.js.map": "/terrier-lover/rewards_distributer/static/js/915.fc3f30b8.chunk.js.map",
-    "787.c39012cf.chunk.js.map": "/terrier-lover/rewards_distributer/static/js/787.c39012cf.chunk.js.map",
-    "668.88c218bb.chunk.js.map": "/terrier-lover/rewards_distributer/static/js/668.88c218bb.chunk.js.map",
-    "196.42c61156.chunk.js.map": "/terrier-lover/rewards_distributer/static/js/196.42c61156.chunk.js.map",
-    "986.221c734d.chunk.js.map": "/terrier-lover/rewards_distributer/static/js/986.221c734d.chunk.js.map"
+    "main.css": "/rewards_distributer/static/css/main.e6c13ad2.css",
+    "main.js": "/rewards_distributer/static/js/main.2057b49c.js",
+    "static/js/780.55757f36.chunk.js": "/rewards_distributer/static/js/780.55757f36.chunk.js",
+    "static/js/538.eada4359.chunk.js": "/rewards_distributer/static/js/538.eada4359.chunk.js",
+    "static/js/915.fc3f30b8.chunk.js": "/rewards_distributer/static/js/915.fc3f30b8.chunk.js",
+    "static/js/787.c39012cf.chunk.js": "/rewards_distributer/static/js/787.c39012cf.chunk.js",
+    "static/js/668.af66e405.chunk.js": "/rewards_distributer/static/js/668.af66e405.chunk.js",
+    "static/js/602.14288a59.chunk.js": "/rewards_distributer/static/js/602.14288a59.chunk.js",
+    "static/js/563.ad1c2bc8.chunk.js": "/rewards_distributer/static/js/563.ad1c2bc8.chunk.js",
+    "static/js/196.33d76cd3.chunk.js": "/rewards_distributer/static/js/196.33d76cd3.chunk.js",
+    "static/js/986.221c734d.chunk.js": "/rewards_distributer/static/js/986.221c734d.chunk.js",
+    "index.html": "/rewards_distributer/index.html",
+    "main.e6c13ad2.css.map": "/rewards_distributer/static/css/main.e6c13ad2.css.map",
+    "main.2057b49c.js.map": "/rewards_distributer/static/js/main.2057b49c.js.map",
+    "780.55757f36.chunk.js.map": "/rewards_distributer/static/js/780.55757f36.chunk.js.map",
+    "538.eada4359.chunk.js.map": "/rewards_distributer/static/js/538.eada4359.chunk.js.map",
+    "915.fc3f30b8.chunk.js.map": "/rewards_distributer/static/js/915.fc3f30b8.chunk.js.map",
+    "787.c39012cf.chunk.js.map": "/rewards_distributer/static/js/787.c39012cf.chunk.js.map",
+    "668.af66e405.chunk.js.map": "/rewards_distributer/static/js/668.af66e405.chunk.js.map",
+    "196.33d76cd3.chunk.js.map": "/rewards_distributer/static/js/196.33d76cd3.chunk.js.map",
+    "986.221c734d.chunk.js.map": "/rewards_distributer/static/js/986.221c734d.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.e6c13ad2.css",
-    "static/js/main.0cb13f82.js"
+    "static/js/main.2057b49c.js"
   ]
 }
