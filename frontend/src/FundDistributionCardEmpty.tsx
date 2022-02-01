@@ -9,7 +9,7 @@ function FundDistributionCardEmpty() {
         <FundDistributionCardSkelton
             headlinePillNode={<FundDistributionCardHeadlinePill />}
             rewardAmountTextNode={
-                <Text fontSize={'6xl'} fontWeight={800}>0</Text>
+                <Text fontSize={'4xl'} color={'grey'}>Not available</Text>
             }
             listDescriptionsNode={CARD_LISTS}
             buttonNode={<FundDistributionButtonCommon isDisabled={true} />}
