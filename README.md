@@ -49,17 +49,28 @@ Following files must be updated prioer to the installation process.
   - Specify information of recipients. Set following values:
     - address: address of recipient
     - amount: reward amount for recipient. 
-    - uniqueKey: To handle duplications of recipients, specify unique key for the pair of address and amount (*1) 
+    - uniqueKey: To handle duplications of recipients, specify unique key for the pair of address and amount. Please see [the detail of the data structure](https://gist.github.com/terrier-lover/80a2fb07320248a5a5de06b75caa0aed) used in this contract.
 - hardhat/hardhat.config.ts
   - Set appropriate values for config variable
 - frontend/src/CustomInputs.ts
-  - TOKEN_IMAGE_URL: _required_ Set image used in the website
-  - SUPPORTED_CHAIN_IDS_IN_WEB: _required_ Chain IDs which should be shown in the website
-  - NETWORK_NAMES, CHAIN_IDS, CHAINS_IDS_AND_NETWORK_NAME_MAPPINGS: _optional_ Definitions of network and chainIds 
+  - TOKEN_IMAGE_URL
+    - _required_ 
+    - Set image used in the website
+  - SUPPORTED_CHAIN_IDS_IN_WEB
+    - _required_ 
+    - Chain IDs which should be shown in the website
+  - NETWORK_NAMES, CHAIN_IDS, CHAINS_IDS_AND_NETWORK_NAME_MAPPINGS
+    - _optional_ 
+    - Definitions of network and chainIds 
 
-## Hardhat
-- $ cd hardhat 
+## Hardhat & Frontend, npm installation
+- $ cd frontend
 - $ npm install
+- $ cd hardhat
+- $ npm install
+
+## Hardhat, deploy
+- $ cd hardhat 
 - Prepare .env using .env.example.  
 
 If you want to use localnet, do followings:
@@ -68,9 +79,8 @@ If you want to use localnet, do followings:
 
 Whenever hardhat compiles and produces new typechains (this is exported under ./hardhat/typechain), copy typechains in hardhat/typechain/ to /frontend/src/typechain/ so that frontend code can use latest definitions. In addition, change the front-end codebase accordingly.
 
-## Frontend
+## Frontend, prepare webserver
 - $ cd frontend
-- $ npm install
 - $ npm start
 
 # How to test

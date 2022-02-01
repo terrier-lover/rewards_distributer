@@ -2,9 +2,12 @@
 Here are demos of this software. These behaviors are confirmed in rinkeby and localhost network.
 
 ## Video
-https://watch.screencastify.com/v/HsjBfZd0Wd23rkZOLkXd
+In this example, it uses USDC in Rinkeby.
+https://github.com/terrier-lover/rewards_distributer/blob/main/demo/video_demo_usdc_reward_1_time.mov
 
 ## Photo
+In this example, it uses "SIM" token for the example.
+
 ### Top page - when token is claimable
 ![First Step](https://raw.githubusercontent.com/terrier-lover/rewards_distributer/main/demo/ui_second_step.png)
 
