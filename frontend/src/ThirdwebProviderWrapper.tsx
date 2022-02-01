@@ -13,12 +13,12 @@ function ThirdwebProviderWrapper(props: {
    */
   const connectors = {
     injected: {},
-    walletconnect: {},
-    walletlink: {
-      appName: "demo",
-      url: "https://thirdweb.com",
-      darkMode: false,
-    },
+    // walletconnect: {},
+    // walletlink: {
+    //   appName: "demo",
+    //   url: "https://thirdweb.com",
+    //   darkMode: false,
+    // },
   };
 
   return (
