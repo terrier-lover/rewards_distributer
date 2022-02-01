@@ -1,7 +1,7 @@
 {
   "name": "app",
   "version": "0.1.0",
-  "homepage": "https://github.com/terrier-lover/rewards_distributer/",
+  "homepage": "https://terrier-lover.github.io/rewards_distributer/",
   "private": true,
   "dependencies": {
     "@3rdweb/hooks": "^1.8.0",
