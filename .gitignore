@@ -13,3 +13,4 @@ hardhat/artifacts
 # Frontend files
 frontend/.env
 frontend/node_modules
+frontend/builds
