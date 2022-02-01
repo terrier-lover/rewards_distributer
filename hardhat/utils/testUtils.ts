@@ -14,6 +14,7 @@ import {
     transferERC20,
     initialDeployAndCreateMerkleTree,
     getERC20AmountWithDecimalsLight,
+    grantRole,
 } from './contractUtils';
 import { expect } from "chai";
 import { BigNumber } from "ethers";
@@ -90,11 +91,10 @@ async function testRecipientClaimFlow(
         // Confirm that claim operation as a recipient is as expected
         await expect(
             distributer.connect(connectAs).claim(address, amount, uniqueKey, hexProof)
-        ).to.emit(distributer, 'Claim').withArgs(connectAs.address, amount, uniqueKey);
+        ).to.emit(distributer, 'Claim').withArgs(address, amount, uniqueKey);
 
         // Confirm that recipient balance increases
-        const recipientBalanceWithDecimals =
-            await erc20.balanceOf(connectAs.address);
+        const recipientBalanceWithDecimals = await erc20.balanceOf(address);
         expect(recipientBalanceWithDecimals).to.equal(
             getERC20AmountWithDecimalsLight(
                 recipientExpectedReward!,
@@ -175,6 +175,7 @@ async function testMainFlow(options: {
         erc20: ERC20Type,
         merkleTree?: MerkleTreeType,
     },
+    rolesInfo?: { targetAddress: string, isModerator: boolean }[],
 }) {
     const {
         distributerAmountWithoutDecimals,
@@ -183,6 +184,7 @@ async function testMainFlow(options: {
         blocklistedOperations,
         testScenarios,
         existingContracts,
+        rolesInfo
     } = options;
 
     let distributer: DistributerType | null = null;
@@ -212,6 +214,23 @@ async function testMainFlow(options: {
         } else {
             merkleTree = existingContracts.merkleTree;
         }
+    }
+
+    if (rolesInfo != null) {
+        distributer;
+        const grantRoles = rolesInfo.map(async roleInfo => {
+            distributer = distributer!;
+            const { isModerator, targetAddress } = roleInfo;
+            const role = isModerator
+                ? await distributer.MODERATOR_ROLE()
+                : await distributer.DEFAULT_ADMIN_ROLE();
+            await grantRole({
+                role,
+                distributer: distributer!,
+                targetAddress,
+            });
+        });
+        await Promise.all(grantRoles);
     }
 
     const pastRecipientsInfo = rawPastRecipientsInfo ?? [];
@@ -312,6 +331,75 @@ async function testIsClaimable(options: {
     await Promise.all(isClaimable);
 }
 
+async function testSetHasClaimed(options: {
+    merkleTree: MerkleTreeType,
+    recipientInfo: TestRecipientInfoType,
+    distributer: DistributerType,
+    tokenDecimals: number,
+    connectAs: SignerWithAddressType,
+}) {
+    const {
+        connectAs,
+        distributer,
+        merkleTree,
+        recipientInfo,
+        tokenDecimals,
+    } = options;
+
+    const { address, uniqueKey } = getClaimArguments({
+        merkleTree,
+        recipientInfo,
+        tokenDecimals
+    });
+
+    const setHasClaimed =
+        await distributer.connect(connectAs).setHasClaimedPerRecipientAndUniqueKey(
+            address,
+            uniqueKey,
+            true, // newHasClaimed
+        );
+    await setHasClaimed.wait();
+}
+
+async function testAllClaimToken({
+    connectAs,
+    doesModeratorConnectAs = false,
+    recipientInfo,
+}: {
+    connectAs: SignerWithAddressType,
+    doesModeratorConnectAs?: boolean,
+    recipientInfo: RecipientInfoType,
+}) {
+    const distributerAmountWithoutDecimals = 100;
+    const {
+        distributer,
+        erc20,
+    } = await testInitialDeployAndCreateMerkleTree({
+        distributerAmountWithoutDecimals,
+        recipientsInfo: [recipientInfo],
+    });
+
+    if (doesModeratorConnectAs != null) {
+        const moderatorRole = await distributer.MODERATOR_ROLE();
+
+        await grantRole({
+            role: moderatorRole,
+            distributer,
+            targetAddress: connectAs.address,
+        });
+    }
+
+    const claimAllDepositsTx = await distributer.connect(connectAs).claimAllDiposits();
+    await claimAllDepositsTx.wait();
+
+    const distributerAmountWithDecimals = await getERC20AmountWithDecimals(
+        distributerAmountWithoutDecimals,
+        erc20
+    );
+    const currentBalance = await erc20.balanceOf(connectAs.address);
+    expect(currentBalance).to.equals(distributerAmountWithDecimals);
+}
+
 export {
     testMainFlow,
     testInitialDeployAndCreateMerkleTree,
@@ -319,4 +407,6 @@ export {
     testRecipientClaimFlow,
     testDistributerV2NewLogic,
     testIsClaimable,
+    testSetHasClaimed,
+    testAllClaimToken,
 };

@@ -21,15 +21,15 @@ abstract contract AbstractMerkleDistributer is
 
     modifier onlyAdminOrModeratorRoles() {
         require(
-            hasRole(DEFAULT_ADMIN_ROLE, msg.sender) ||
-                hasRole(MODERATOR_ROLE, msg.sender),
+            hasRole(DEFAULT_ADMIN_ROLE, _msgSender()) ||
+                hasRole(MODERATOR_ROLE, _msgSender()),
             "Not admin or moderator"
         );
         _;
     }
 
     function initialize() public initializer {
-        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
     }
 
     function claim(

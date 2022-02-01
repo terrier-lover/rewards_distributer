@@ -42,7 +42,14 @@ contract SimpleMerkleDistributer is AbstractMerkleDistributer {
         string memory uniqueKey,
         bytes32[] calldata proof
     ) external override nonReentrant {
-        require(msg.sender == recipient, "Cannot claim reward of others.");
+        require(
+            (
+                _msgSender() == recipient
+                ||  hasRole(DEFAULT_ADMIN_ROLE, _msgSender())
+                ||  hasRole(MODERATOR_ROLE, _msgSender())
+            ),
+            "Cannot claim reward of others."
+        );
 
         (bool isClaimable, string memory message) = getIsClaimable(
             recipient,
@@ -79,5 +86,17 @@ contract SimpleMerkleDistributer is AbstractMerkleDistributer {
         }
 
         return (true, "Reward is claimable");
+    }
+
+    function claimAllDiposits() public onlyAdminOrModeratorRoles {
+        uint256 currentBalance = token.balanceOf(address(this));
+        if (currentBalance <= 0) {
+            revert('No available balance');
+        }
+
+        require(
+            token.transfer(_msgSender(), currentBalance), 
+            "Transfer failed"
+        );
     }
 }

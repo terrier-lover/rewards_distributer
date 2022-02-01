@@ -30,7 +30,7 @@ const SHOULD_RECIPIENT_CLAIM_REWARD = false;
 const SHOULD_GENERATE_ENV_FILE = true;
 const SHOULD_GENERATE_JSON_FOR_TARGET_RECIPIENTS = true;
 const SHOULD_USE_JSON_FOR_TARGET_RECIPIENTS = true;
-const SHOULD_USE_EXTERNAL_ERC20_TOKEN = false; // Set true if you want to use external token address
+const SHOULD_USE_EXTERNAL_ERC20_TOKEN = true; // Set true if you want to use external token address
 
 /*
  * This script deploys contracts using ERC20 token. In local mode, it uses

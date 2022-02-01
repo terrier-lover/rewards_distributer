@@ -25,6 +25,7 @@ interface TestSimpleMerkleDistributerV2Interface
     "DEFAULT_ADMIN_ROLE()": FunctionFragment;
     "MODERATOR_ROLE()": FunctionFragment;
     "claim(address,uint256,string,bytes32[])": FunctionFragment;
+    "claimAllDiposits()": FunctionFragment;
     "getIsClaimable(address,uint256,string,bytes32[])": FunctionFragment;
     "getRoleAdmin(bytes32)": FunctionFragment;
     "getRoleMember(bytes32,uint256)": FunctionFragment;
@@ -56,6 +57,10 @@ interface TestSimpleMerkleDistributerV2Interface
   encodeFunctionData(
     functionFragment: "claim",
     values: [string, BigNumberish, string, BytesLike[]]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "claimAllDiposits",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "getIsClaimable",
@@ -133,6 +138,10 @@ interface TestSimpleMerkleDistributerV2Interface
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "claim", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "claimAllDiposits",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "getIsClaimable",
     data: BytesLike
@@ -281,6 +290,10 @@ export class TestSimpleMerkleDistributerV2 extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    claimAllDiposits(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     getIsClaimable(
       recipient: string,
       amount: BigNumberish,
@@ -378,6 +391,10 @@ export class TestSimpleMerkleDistributerV2 extends BaseContract {
     amount: BigNumberish,
     uniqueKey: string,
     proof: BytesLike[],
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  claimAllDiposits(
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -480,6 +497,8 @@ export class TestSimpleMerkleDistributerV2 extends BaseContract {
       proof: BytesLike[],
       overrides?: CallOverrides
     ): Promise<void>;
+
+    claimAllDiposits(overrides?: CallOverrides): Promise<void>;
 
     getIsClaimable(
       recipient: string,
@@ -654,6 +673,10 @@ export class TestSimpleMerkleDistributerV2 extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    claimAllDiposits(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     getIsClaimable(
       recipient: string,
       amount: BigNumberish,
@@ -757,6 +780,10 @@ export class TestSimpleMerkleDistributerV2 extends BaseContract {
       amount: BigNumberish,
       uniqueKey: string,
       proof: BytesLike[],
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    claimAllDiposits(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 

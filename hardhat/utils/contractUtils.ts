@@ -219,6 +219,22 @@ async function getRelevantContracts() {
     return { erc20, distributer };
 }
 
+async function grantRole({
+    role,
+    distributer,
+    targetAddress,
+}: {
+    role: string,
+    distributer: DistributerType,
+    targetAddress: string,
+}) {
+    const grantRoleTx = await distributer.grantRole(
+        role,
+        targetAddress,
+    );
+    await grantRoleTx.wait();
+}
+
 export {
     ERC20_CONTRACT_ADDRESS,
     DISTRIBUTER_CONTRACT_ADDRESS,
@@ -233,4 +249,5 @@ export {
     transferERC20,
     mintSimpleToken,
     getERC20ContractAddress,
+    grantRole,
 };

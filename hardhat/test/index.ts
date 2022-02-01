@@ -3,12 +3,14 @@ import type {
 } from "../typechain";
 
 import { ethers } from "hardhat";
-import { upgradeToDistributerV2 } from "../utils/contractUtils";
+import { grantRole, upgradeToDistributerV2 } from "../utils/contractUtils";
 import {
   testInitialDeployAndCreateMerkleTree,
   testMainFlow,
   testDistributerV2NewLogic,
-  testIsClaimable
+  testIsClaimable,
+  testSetHasClaimed,
+  testAllClaimToken
 } from "../utils/testUtils";
 
 describe("Test using SimpleMerkleDistributer contract", () => {
@@ -282,35 +284,6 @@ describe("Test using SimpleMerkleDistributer contract", () => {
         // When setting existing contracts, it will use these contracts.
         existingContracts: { distributer, erc20 },
       });
-
-      // // Test changing hasClaimed value for certain user. 
-      // // Set false at hasClaimed for a user who already claimed the rewards.
-      // const setHasClaimed = await distributer.setHasClaimedPerRecipient(
-      //   recipient3EligibleForFirstAndSecondReward.address,
-      //   false, // newHasClaimed
-      // );
-      // await setHasClaimed.wait();
-
-      // const thirdTestScenarios = [
-      //   {
-      //     recipientInfo: {
-      //       address: recipient3EligibleForFirstAndSecondReward.address,
-      //       rewardAmountWithoutDecimals: recipientRewardAmount + 500,
-      //       uniqueKey: uniqueKey2,
-      //       connectAs: recipient3EligibleForFirstAndSecondReward,
-      //     },
-      //     // This use should be able to claim rewards.
-      //     testScenario: commonSuccessTestScenario,
-      //   },
-      // ];
-      // await testMainFlow({
-      //   distributerAmountWithoutDecimals,
-      //   recipientsInfo: thirdTestScenarios.map(el => el.recipientInfo),
-      //   testScenarios: thirdTestScenarios.map(el => el.testScenario),
-      //   pastRecipientsInfo: firstTestScenarios.map(el => el.recipientInfo),
-      //   // When setting existing contracts, it will use these contracts.
-      //   existingContracts: { distributer, erc20 },
-      // });
     }
   );
 
@@ -399,6 +372,178 @@ describe("Test using SimpleMerkleDistributer contract", () => {
           erc20,
           merkleTree
         },
+      });
+    }
+  );
+
+  it(
+    "Correct flow - After admin or moderator setting that recipients already claimed, recipient cannot receive it.",
+    async () => {
+      const [
+        owner,
+        recipient1,
+        recipient2,
+        recipient3,
+        moderator,
+      ] = await ethers.getSigners();
+
+      const recipientBeingSetClaimedByAdminInfo = {
+        address: recipient1.address,
+        rewardAmountWithoutDecimals: recipientRewardAmount,
+        uniqueKey: uniqueKey1,
+        connectAs: recipient1,
+      };
+      const recipientBeingSetClaimedByModeratorInfo = {
+        address: recipient2.address,
+        rewardAmountWithoutDecimals: recipientRewardAmount,
+        uniqueKey: uniqueKey1,
+        connectAs: recipient2,
+      };
+      const recipientBeingClaimableInfo = {
+        address: recipient3.address,
+        rewardAmountWithoutDecimals: recipientRewardAmount,
+        uniqueKey: uniqueKey1,
+        connectAs: recipient3,
+      };
+
+      const {
+        distributer,
+        erc20,
+        merkleTree
+      } = await testInitialDeployAndCreateMerkleTree({
+        distributerAmountWithoutDecimals,
+        recipientsInfo: [
+          recipientBeingSetClaimedByAdminInfo,
+          recipientBeingSetClaimedByModeratorInfo,
+          recipientBeingClaimableInfo,
+        ],
+      });
+
+      const moderatorRole = await distributer.MODERATOR_ROLE();
+      await grantRole({
+        role: moderatorRole,
+        distributer,
+        targetAddress: moderator.address,
+      });
+
+      const tokenDecimals = await erc20.decimals();
+
+      // Connect as admin (owner), and mark recipient as claimed.
+      testSetHasClaimed({
+        merkleTree,
+        recipientInfo: recipientBeingSetClaimedByAdminInfo,
+        distributer,
+        tokenDecimals,
+        connectAs: owner,
+      });
+
+      // Connect as admin (moderator), and mark recipient as claimed.
+      testSetHasClaimed({
+        merkleTree,
+        recipientInfo: recipientBeingSetClaimedByModeratorInfo,
+        distributer,
+        tokenDecimals,
+        connectAs: moderator,
+      });
+
+      await testIsClaimable({
+        erc20,
+        merkleTree,
+        recipientsInfo: [
+          recipientBeingSetClaimedByAdminInfo,
+          recipientBeingSetClaimedByModeratorInfo,
+          recipientBeingClaimableInfo,
+        ],
+        distributer,
+        scenariosIsClaimable: [
+          false, // Corresponds with recipientBeingSetClaimedByAdminInfo
+          false, // Corresponds with recipientBeingSetClaimedByModeratorInfo
+          true, // Corresponds with recipientBeingClaimableInfo
+        ],
+      });
+    },
+  );
+
+  it(
+    "Correct flow - Admin can claim token from contract",
+    async () => {
+      const [owner, recipient] = await ethers.getSigners();
+
+      const recipientInfo = {
+        address: recipient.address,
+        rewardAmountWithoutDecimals: recipientRewardAmount,
+        uniqueKey: uniqueKey1,
+      };
+      await testAllClaimToken({
+        connectAs: owner,
+        recipientInfo,
+      });
+    },
+  );
+
+  it(
+    "Correct flow - Moderator can claim token from contract",
+    async () => {
+      const [_, recipient, moderator] = await ethers.getSigners();
+
+      const recipientInfo = {
+        address: recipient.address,
+        rewardAmountWithoutDecimals: recipientRewardAmount,
+        uniqueKey: uniqueKey1,
+      };
+      await testAllClaimToken({
+        connectAs: moderator,
+        recipientInfo,
+      });
+    },
+  );
+
+  it(
+    "Correct flow - admin or moderator can distribute reward",
+    async () => {
+      const [
+        owner, 
+        recipient1, 
+        recipient2, 
+        moderator,
+      ] = await ethers.getSigners();
+
+      const recipientsInfoAndTestScenarios = [
+        {
+          recipientInfo: {
+            address: recipient1.address,
+            rewardAmountWithoutDecimals: recipientRewardAmount,
+            uniqueKey: uniqueKey1,
+            connectAs: owner, // Check the case when connecting as owner
+          },
+          testScenario: {
+            shouldFirstClaimRevert: false,
+            shouldSecondClaimRevert: true,
+            isFirstGetClaimable: true,
+            isSecondGetClaimable: false,
+          },
+        },
+        {
+          recipientInfo: {
+            address: recipient2.address,
+            rewardAmountWithoutDecimals: recipientRewardAmount,
+            uniqueKey: uniqueKey2,
+            connectAs: moderator, // Check the case when connecting as moderator
+          },
+          testScenario: {
+            shouldFirstClaimRevert: false,
+            shouldSecondClaimRevert: true,
+            isFirstGetClaimable: true,
+            isSecondGetClaimable: false,
+          },
+        },
+      ];
+
+      await testMainFlow({
+        distributerAmountWithoutDecimals,
+        recipientsInfo: recipientsInfoAndTestScenarios.map(el => el.recipientInfo),
+        testScenarios: recipientsInfoAndTestScenarios.map(el => el.testScenario),
+        rolesInfo: [{ targetAddress: moderator.address, isModerator: true }],
       });
     }
   );
