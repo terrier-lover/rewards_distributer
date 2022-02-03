@@ -19,9 +19,8 @@ import {
     SimpleToken__factory as SimpleTokenFactory,
 } from '../typechain';
 import { ENV } from './../settings';
-import { readFile, writeFile } from 'fs';
+import { promises as fs } from 'fs';
 import { parse, stringify } from 'envfile';
-import { promisify } from "util";
 import { COMMON_VARIABLES_AND_FUNCTIONS } from "../settings";
 
 const {
@@ -34,13 +33,13 @@ async function setEnv(
     keyValueMap: { [key: string]: string },
     path: string,
 ) {
-    const envRawData = await promisify(readFile)(path, { encoding: 'utf-8' });
+    const envRawData = await fs.readFile(path, { encoding: 'utf-8' });
     const envData = parse(envRawData);
     Object.keys(keyValueMap).forEach(key => {
         envData[key] = keyValueMap[key];
     });
 
-    await promisify(writeFile)(path, stringify(envData));
+    await fs.writeFile(path, stringify(envData));
 }
 
 async function setRecipientsInfo(
@@ -48,7 +47,7 @@ async function setRecipientsInfo(
     path: string,
 ) {
     const json = JSON.stringify(recipientsInfo);
-    await promisify(writeFile)(path, json);
+    await fs.writeFile(path, json);
 }
 
 function getContractAddress() {

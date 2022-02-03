@@ -72,7 +72,7 @@ async function main() {
     );
     await setRecipientsInfo(
         recipientsInfo,
-        PATH_TO_REACT_ROOT_RECIPIENTS_INFO_JSON,
+        `${__dirname}/./../../../frontend/src/recipientsInfo.json`,
     );
 }
 
