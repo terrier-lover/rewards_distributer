@@ -4,11 +4,20 @@ import {
     getRelevantContracts,
 } from "../../utils/contractUtils";
 
-// Specify amounts which will be passed to holder contract
-const AMOUNT_WITHOUT_DECIMALS = 10000000;
+// Specify amounts which will be passed to distributer contract
+const AMOUNT_WITHOUT_DECIMALS = 1000;
 
 async function main() {
     const { erc20, distributer } = await getRelevantContracts();
+
+    const balance = await erc20.balanceOf(distributer.address);
+    const decimals = await erc20.decimals();
+    console.log(
+        'Current contract balance:', 
+        balance,
+        'Decimals:',
+        decimals
+    );
 
     const [owner] = await ethers.getSigners();
 
